@@ -187,7 +187,7 @@ void UBPreferencesController::wire()
     connect(mPreferencesUI->PSCredentialsPersistenceCheckBox,SIGNAL(clicked()),this, SLOT(onCommunityPersistenceChanged()));
 
     // about tab
-    connect(mPreferencesUI->checkSoftwareUpdateAtLaunchCheckBox, SIGNAL(clicked(bool)), settings->appEnableAutomaticSoftwareUpdates, SLOT(setBool(bool)));
+    //connect(mPreferencesUI->checkSoftwareUpdateAtLaunchCheckBox, SIGNAL(clicked(bool)), settings->appEnableAutomaticSoftwareUpdates, SLOT(setBool(bool)));
 }
 
 void UBPreferencesController::init()
@@ -195,7 +195,7 @@ void UBPreferencesController::init()
     UBSettings* settings = UBSettings::settings();
 
     // about tab
-    mPreferencesUI->checkSoftwareUpdateAtLaunchCheckBox->setChecked(settings->appEnableAutomaticSoftwareUpdates->get().toBool());
+    //mPreferencesUI->checkSoftwareUpdateAtLaunchCheckBox->setChecked(settings->appEnableAutomaticSoftwareUpdates->get().toBool());
 
     // display tab
     for(int i=0; i<mPreferencesUI->keyboardPaletteKeyButtonSize->count(); i++)
@@ -453,8 +453,8 @@ void UBPreferencesController::defaultSettings()
     }
     else if (mPreferencesUI->mainTabWidget->currentWidget() == mPreferencesUI->aboutTab)
     {
-        bool defaultValue = settings->appEnableAutomaticSoftwareUpdates->reset().toBool();
-        mPreferencesUI->checkSoftwareUpdateAtLaunchCheckBox->setChecked(defaultValue);
+        //bool defaultValue = settings->appEnableAutomaticSoftwareUpdates->reset().toBool();
+        //mPreferencesUI->checkSoftwareUpdateAtLaunchCheckBox->setChecked(defaultValue);
     }
     else if(mPreferencesUI->mainTabWidget->currentWidget() == mPreferencesUI->networkTab){
         bool defaultValue = settings->webUseExternalBrowser->reset().toBool();

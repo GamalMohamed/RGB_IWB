@@ -43,7 +43,7 @@ class UBBrushPropertiesFrame;
 
 class UBPreferencesDialog : public QDialog
 {
-    Q_OBJECT;
+    Q_OBJECT
 
 public:
     UBPreferencesDialog(UBPreferencesController* prefController, QWidget* parent = 0,Qt::WindowFlags f = 0 );

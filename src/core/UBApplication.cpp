@@ -131,7 +131,7 @@ UBApplication::UBApplication(const QString &id, int &argc, char **argv) : QtSing
     updateProtoActionsState();
 
 #ifndef Q_WS_MAC
-    setWindowIcon(QIcon(":/images/uniboard.png"));
+    setWindowIcon(QIcon(":/images/RGB_logo.png"));
 #endif
 
     setStyle(new UBStyle()); // Style is owned and deleted by the application
@@ -530,7 +530,7 @@ void UBApplication::decorateActionMenu(QAction* action)
             tb->setObjectName("ubButtonMenu");
             tb->setPopupMode(QToolButton::InstantPopup);
             QMenu* menu = new QMenu(mainWindow);
-            menu->setStyleSheet("QMenu::item { background-color: #6495ed; }");
+            menu->setStyleSheet("QMenu::item { background-color: rgb(65,105,225); }");
 
             // Removing Page size submenu, Multiscreen, updates options
             /*

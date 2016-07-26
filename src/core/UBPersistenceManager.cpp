@@ -87,7 +87,7 @@ UBPersistenceManager::UBPersistenceManager(QObject *pParent)
     mDocumentSubDirectories << videoDirectory;
     mDocumentSubDirectories << audioDirectory;
     mDocumentSubDirectories << teacherGuideDirectory;
-    mDocumentSubDirectories << fileDirectory; // Issue 1683 (Evolution) - AOU - 20131206
+    mDocumentSubDirectories << fileDirectory;
 
     mDocumentRepositoryPath = UBSettings::userDocumentDirectory();
     mFoldersXmlStorageName =  mDocumentRepositoryPath + "/" + fFolders;

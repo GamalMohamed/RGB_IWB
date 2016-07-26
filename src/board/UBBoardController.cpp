@@ -398,7 +398,6 @@ void UBBoardController::connectToolbar()
     connect(mMainWindow->actionEraseAnnotations, SIGNAL(triggered()), this, SLOT(clearSceneAnnotation()));
     connect(mMainWindow->actionEraseBackground,SIGNAL(triggered()),this,SLOT(clearSceneBackground()));
 
-    // Issue 1684 - CFA - 20131119
     connect(mMainWindow->actionCenterImageBackground, SIGNAL(triggered()), this, SLOT( centerImageBackground()));
     connect(mMainWindow->actionAdjustImageBackground, SIGNAL(triggered()), this, SLOT( adjustImageBackground()));
     connect(mMainWindow->actionMosaicImageBackground, SIGNAL(triggered()), this, SLOT( mosaicImageBackground()));
@@ -415,7 +414,6 @@ void UBBoardController::connectToolbar()
     connect(mMainWindow->actionVirtualKeyboard, SIGNAL(triggered(bool)), this, SLOT(showKeyboard(bool)));
     connect(mMainWindow->actionImportPage, SIGNAL(triggered()), this, SLOT(importPage()));
 
-    //EV-7 - NNE - 20131230
 }
 
 void UBBoardController::startScript()
@@ -500,18 +498,17 @@ void UBBoardController::stylusToolDoubleClicked(int tool)
 void UBBoardController::addScene()
 {
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    persistViewPositionOnCurrentScene();// Issue 1598/1605 - CFA - 20131028
+    persistViewPositionOnCurrentScene();
     persistCurrentScene();
 
     UBDocumentContainer::addPage(mActiveSceneIndex + 1);
 
     selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
 
-    reloadThumbnails(); // Issue 1026 - AOU - 20131028 : (commentaire du 20130925) - synchro des thumbnails présentés en mode Board et en mode Documents.
+    reloadThumbnails();
 
     setActiveDocumentScene(mActiveSceneIndex + 1);
 
-    // Issue 1684 - CFA - 20131127 : handle default background // Issue 1684 - ALTI/AOU - 20131210
     QString backgroundImage = selectedDocument()->metaData(UBSettings::documentDefaultBackgroundImage).toString();
     qDebug() << backgroundImage;
     UBFeatureBackgroundDisposition backgroundImageDisposition = static_cast<UBFeatureBackgroundDisposition>(selectedDocument()->metaData(UBSettings::documentDefaultBackgroundImageDisposition).toInt());
