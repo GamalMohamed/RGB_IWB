@@ -82,7 +82,6 @@ class UBBoardPaletteManager : public QObject
 
         UBDockTeacherGuideWidget* teacherGuideDockWidget() { return mpTeacherGuideWidget;}
 
-        //issue 1682 - NNE - 20140110
         UBDockResourcesWidget* teacherResourcesDockWidget(){ return mTeacherResources; }
 
         void processPalettersWidget(UBDockPalette *paletter, eUBDockPaletteWidgetMode mode);
@@ -128,7 +127,6 @@ class UBBoardPaletteManager : public QObject
         /** The right dock palette */
         UBRightPalette* mRightPalette;
 
-        //issue 1682 - NNE - 20131218
         UBDockResourcesWidget *mTeacherResources;
 
         UBActionPalette *mBackgroundsPalette;
@@ -138,7 +136,6 @@ class UBBoardPaletteManager : public QObject
         UBActionPalette* mPagePalette;
         UBActionPalette* mImageBackgroundPalette;// Issue 1684 - CFA - 20131119
 
-        // EV-7 - CFA - 20140102
         UBActionPaletteButton* mEllipseActionPaletteButton;
 
         QUrl mItemUrl;

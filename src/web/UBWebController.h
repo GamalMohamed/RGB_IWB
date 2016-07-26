@@ -40,7 +40,7 @@ class UBServerXMLHttpRequest;
 
 class UBWebController : public QObject
 {
-    Q_OBJECT;
+    Q_OBJECT
 
     public:
         UBWebController(UBMainWindow* mainWindow);

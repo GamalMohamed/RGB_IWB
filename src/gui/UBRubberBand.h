@@ -28,7 +28,7 @@
 
 class UBRubberBand : public QRubberBand
 {
-    Q_OBJECT;
+    Q_OBJECT
 
     public:
         UBRubberBand(Shape s, QWidget * p = 0);

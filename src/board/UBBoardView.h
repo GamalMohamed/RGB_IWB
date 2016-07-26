@@ -66,7 +66,6 @@ class UBBoardView : public QGraphicsView
         void shown();
         void clickOnBoard();
 
-        //EV-7 - NNE - 20131231
         void mouseMove(QMouseEvent* event);
         void mousePress(QMouseEvent* event);
         void mouseRelease(QMouseEvent* event);

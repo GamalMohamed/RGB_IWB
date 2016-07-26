@@ -85,8 +85,8 @@ UBDockPalette::UBDockPalette(eUBDockPaletteType paletteType, QWidget *parent, co
 
     mBackgroundBrush = QBrush(UBSettings::paletteColor);
 
-    // This is the only way to set the background as transparent!
-    setStyleSheet("QWidget {background-color: transparent}");
+    // Filling inside the side palettes
+    setStyleSheet("QWidget {background-color: rgb(180,0,255)}");
 
     // Set the position of the tab
     onToolbarPosUpdated();
@@ -584,6 +584,8 @@ bool UBDockPalette::switchMode(eUBDockPaletteWidgetMode mode)
 }
 
 
+
+/****************************UBTabDockPalette methods****************************/
 UBTabDockPalette::UBTabDockPalette(UBDockPalette *dockPalette, QWidget *parent) :
             QWidget(parent)
 , dock(dockPalette)
@@ -594,6 +596,10 @@ UBTabDockPalette::UBTabDockPalette(UBDockPalette *dockPalette, QWidget *parent) 
     resize(2 * dock->border(), (numTabs * TABSIZE) + qMax(numTabs - 1, 0) * dock->tabSpacing());
 
     setAttribute(Qt::WA_TranslucentBackground);
+}
+
+UBTabDockPalette::~UBTabDockPalette(){
+
 }
 
 void UBTabDockPalette::paintEvent(QPaintEvent *event)
@@ -616,40 +622,45 @@ void UBTabDockPalette::paintEvent(QPaintEvent *event)
         path.setFillRule(Qt::WindingFill);
         QPixmap iconPixmap;
 
-        switch (dock->mOrientation) {
-        case eUBDockOrientation_Left:
-            path.addRect(0, yFrom, width() / 2, TABSIZE);
-            path.addRoundedRect(0, yFrom, width(), TABSIZE, dock->radius(), dock->radius());
-            if (pCrntWidget) {
-                if(dock->mCollapseWidth >= dock->width()) {
-                    // Get the collapsed icon
-                    iconPixmap = pCrntWidget->iconToRight();
-                } else {
-                    // Get the expanded icon
-                    iconPixmap = pCrntWidget->iconToLeft();
+        switch (dock->mOrientation)
+        {
+            case eUBDockOrientation_Left:
+                path.addRect(0, yFrom, width() / 2, TABSIZE);
+                path.addRoundedRect(0, yFrom, width(), TABSIZE, dock->radius(), dock->radius());
+                if (pCrntWidget) {
+                    if(dock->mCollapseWidth >= dock->width())
+                    {
+                        // Get the collapsed icon
+                        iconPixmap = pCrntWidget->iconToRight();
+                    } else
+                    {
+                        // Get the expanded icon
+                        iconPixmap = pCrntWidget->iconToLeft();
+                    }
+
                 }
+                break;
 
-            }
-            break;
-
-        case eUBDockOrientation_Right:
-            path.addRect(width() /2, yFrom, width() / 2, TABSIZE);
-            path.addRoundedRect(0, yFrom, width(), TABSIZE, dock->radius(), dock->radius());
-            if (pCrntWidget) {
-                if(dock->mCollapseWidth >= dock->width()) {
-                    // Get the collapsed icon
-                    iconPixmap = pCrntWidget->iconToLeft();
-                } else {
-                    // Get the expanded icon
-                    iconPixmap = pCrntWidget->iconToRight();
+            case eUBDockOrientation_Right:
+                path.addRect(width() /2, yFrom, width() / 2, TABSIZE);
+                path.addRoundedRect(0, yFrom, width(), TABSIZE, dock->radius(), dock->radius());
+                if (pCrntWidget) {
+                    if(dock->mCollapseWidth >= dock->width())
+                    {
+                        // Get the collapsed icon
+                        iconPixmap = pCrntWidget->iconToLeft();
+                    } else
+                    {
+                        // Get the expanded icon
+                        iconPixmap = pCrntWidget->iconToRight();
+                    }
                 }
-            }
-            break;
+                break;
 
-        case eUBDockOrientation_Top: ;
-        case eUBDockOrientation_Bottom: ;
-        default:
-            break;
+            case eUBDockOrientation_Top: ;
+            case eUBDockOrientation_Bottom: ;
+            default:
+                break;
         }
 
         painter.save();
@@ -665,9 +676,6 @@ void UBTabDockPalette::paintEvent(QPaintEvent *event)
         yFrom += (TABSIZE + dock->tabSpacing());
         painter.restore();
     }
-}
-UBTabDockPalette::~UBTabDockPalette()
-{
 }
 
 void UBTabDockPalette::mousePressEvent(QMouseEvent *event)

@@ -1611,8 +1611,7 @@ UBBoardView::leaveEvent (QEvent * event)
   QGraphicsView::leaveEvent (event);
 }
 
-void
-UBBoardView::drawItems (QPainter *painter, int numItems,
+void UBBoardView::drawItems (QPainter *painter, int numItems,
                         QGraphicsItem* items[],
                         const QStyleOptionGraphicsItem options[])
 {
@@ -1727,8 +1726,7 @@ void UBBoardView::dropEvent (QDropEvent *event)
     }
 }
 
-void
-UBBoardView::resizeEvent (QResizeEvent * event)
+void UBBoardView::resizeEvent (QResizeEvent * event)
 {
   const qreal maxWidth = width () * 10;
   const qreal maxHeight = height () * 10;
@@ -1739,8 +1737,7 @@ UBBoardView::resizeEvent (QResizeEvent * event)
   emit resized (event);
 }
 
-void
-UBBoardView::drawBackground (QPainter *painter, const QRectF &rect)
+void UBBoardView::drawBackground (QPainter *painter, const QRectF &rect)
 {
   if (testAttribute (Qt::WA_TranslucentBackground))
     {
@@ -1822,8 +1819,7 @@ UBBoardView::drawBackground (QPainter *painter, const QRectF &rect)
     }
 }
 
-void
-UBBoardView::settingChanged (QVariant newValue)
+void UBBoardView::settingChanged (QVariant newValue)
 {
   Q_UNUSED (newValue);
 
@@ -1856,14 +1852,12 @@ bool UBBoardView::isAbsurdPoint(QPoint point)
     return !isValidPoint;
 }
 
-void
-UBBoardView::focusOutEvent (QFocusEvent * event)
+void UBBoardView::focusOutEvent (QFocusEvent * event)
 {
   Q_UNUSED (event);
 }
 
-void
-UBBoardView::setToolCursor (int tool)
+void UBBoardView::setToolCursor (int tool)
 {
   QWidget *controlViewport = viewport ();
   switch (tool)

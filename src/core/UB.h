@@ -1,26 +1,3 @@
-/*
- * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
- *
- * This file is part of Open-Sankoré.
- *
- * Open-Sankoré is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License,
- * with a specific linking exception for the OpenSSL project's
- * "OpenSSL" library (or with modified versions of it that use the
- * same license as the "OpenSSL" library).
- *
- * Open-Sankoré is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Open-Sankoré.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-
-
 #ifndef UB_H_
 #define UB_H_
 
@@ -66,8 +43,8 @@ struct UBStylusTool
         Text,
         Capture,
         RichText,
-        ChangeFill,//EV-7 - CFA - 20140122 : pot de peinture
-        Drawing //EV-7 - NNE - 20140103
+        ChangeFill,
+        Drawing
     };
 };
 

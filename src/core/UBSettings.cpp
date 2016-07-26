@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
  *
  * This file is part of Open-Sankoré.
@@ -60,16 +60,10 @@ QString UBSettings::sessionSubjects = QString("sessionSubjects");
 QString UBSettings::sessionType = QString("sessionType");
 QString UBSettings::sessionLicence = QString("sessionLicence");
 QString UBSettings::documentDate = QString("date");
-// Issue 1684 - ALTI/AOU - 20131210
 QString UBSettings::documentDefaultBackgroundImage = QString("defaultBackgroundImage");
 QString UBSettings::documentDefaultBackgroundImageDisposition = QString("defaultBackgroundImageDisposition");
-// Fin Issue 1684 - ALTI/AOU - 20131210
-
-//Issue N/C - NNE - 20140526
 QString UBSettings::documentTagVersion = QString("versionCreation");
-
 QString UBSettings::trashedDocumentGroupNamePrefix = QString("_Trash:");
-
 QString UBSettings::uniboardDocumentNamespaceUri = "http://uniboard.mnemis.com/document";
 QString UBSettings::uniboardApplicationNamespaceUri = "http://uniboard.mnemis.com/application";
 
@@ -91,7 +85,7 @@ QPen UBSettings::eraserPenLightBackground = QPen(QColor(0, 0, 0, 63));
 QColor UBSettings::documentSizeMarkColorDarkBackground = QColor(44, 44, 44, 200);
 QColor UBSettings::documentSizeMarkColorLightBackground = QColor(241, 241, 241);
 
-QColor UBSettings::paletteColor = QColor(127, 127, 127, 127);
+QColor UBSettings::paletteColor = QColor(180, 0, 255, 255); //Light blue
 QColor UBSettings::opaquePaletteColor = QColor(66, 66, 66, 200);
 
 QColor UBSettings::documentViewLightColor = QColor(241, 241, 241);
@@ -106,7 +100,7 @@ const int UBSettings::defaultGipWidth = 150;
 const int UBSettings::defaultSoundWidth = 50;
 const int UBSettings::defaultImageWidth = 150;
 const int UBSettings::defaultShapeWidth = 50;
-const int UBSettings::defaultWidgetIconWidth = 110;
+const int UBSettings::defaultWidgetIconWidth = 20;
 const int UBSettings::defaultVideoWidth = 80;
 
 const int UBSettings::thumbnailSpacing = 20;
@@ -125,6 +119,7 @@ QColor UBSettings::treeViewBackgroundColor = QColor(209, 215, 226); //in synch w
 int UBSettings::objectInControlViewMargin = 100;
 
 QString UBSettings::appPingMessage = "__uniboard_ping";
+
 
 UBSettings* UBSettings::settings()
 {
@@ -217,15 +212,18 @@ void UBSettings::ValidateKeyboardPaletteKeyBtnSize()
 
 void UBSettings::init()
 {
-    productWebUrl =  new UBSetting(this, "App", "ProductWebAddress", "http://www.sankore.org");
+    productWebUrl =  new UBSetting(this, "App", "ProductWebAddress", "https://www.rgbsystem.net");
 
     softwareHomeUrl = productWebUrl->get().toString();
 
-//    QRect mainScreenGeometry = UBApplication::desktop()->screenGeometry(UBApplication::desktop()->primaryScreen());
-//    documentSizes.insert(DocumentSizeRatio::Ratio4_3, QSize(mainScreenGeometry.height() * 4.f / 3.f, mainScreenGeometry.height())); // 1.33
-//    documentSizes.insert(DocumentSizeRatio::Ratio16_10, QSize((mainScreenGeometry.height() * 16.f / 10.f), mainScreenGeometry.height())); // 1.6
-//    documentSizes.insert(DocumentSizeRatio::Ratio16_9, QSize((mainScreenGeometry.height() * 16.f / 9.f), mainScreenGeometry.height())); // 1.77
-    documentSizes.insert(DocumentSizeRatio::Ratio4_3, QSize(1280, 960)); // 1.33
+    /*Page size x-settings
+    QRect mainScreenGeometry = UBApplication::desktop()->screenGeometry(UBApplication::desktop()->primaryScreen());
+    documentSizes.insert(DocumentSizeRatio::Ratio4_3, QSize(mainScreenGeometry.height() * 4.f / 3.f, mainScreenGeometry.height())); // 1.33
+    documentSizes.insert(DocumentSizeRatio::Ratio16_10, QSize((mainScreenGeometry.height() * 16.f / 10.f), mainScreenGeometry.height())); // 1.6
+    documentSizes.insert(DocumentSizeRatio::Ratio16_9, QSize((mainScreenGeometry.height() * 16.f / 9.f), mainScreenGeometry.height())); // 1.77
+    */
+
+    documentSizes.insert(DocumentSizeRatio::Ratio4_3, QSize(1280, 960));               // 1.33
     documentSizes.insert(DocumentSizeRatio::Ratio16_10, QSize((960 / 10 * 16), 960)); // 1.60
     documentSizes.insert(DocumentSizeRatio::Ratio16_9, QSize((960 / 9 * 16), 960)); // 1.77
 
@@ -234,7 +232,6 @@ void UBSettings::init()
     appEnableAutomaticSoftwareUpdates = new UBSetting(this, "App", "EnableAutomaticSoftwareUpdates", true);
     appEnableSoftwareUpdates = new UBSetting(this, "App", "EnableSoftwareUpdates", true);
     appToolBarOrientationVertical = new UBSetting(this, "App", "ToolBarOrientationVertical", false);    
-
     appDrawingPaletteOrientationHorizontal = new UBSetting(this, "App", "DrawingPaletteOrientationHorizontal", false);
 
     rightLibPaletteBoardModeWidth = new UBSetting(this, "Board", "RightLibPaletteBoardModeWidth", 270);
@@ -251,7 +248,6 @@ void UBSettings::init()
     userCrossDarkBackground = new UBColorListSetting(this, "Board", "crossDarkBackgroundColor", "127 127 127", 0.75);
     userCrossLightBackground = new UBColorListSetting(this, "Board", "crossLightBackgroundColor", "83 173 173", 1);
 
-    QColor bgCrossColor;
     QStringList colors;
     colors = userCrossDarkBackground->get().toString().split(" ", QString::SkipEmptyParts);
     if (3 == colors.count())
@@ -265,13 +261,12 @@ void UBSettings::init()
     if (4 == colors.count())
         crossLightBackground = QColor(colors[0].toInt(),colors[1].toInt(),colors[2].toInt(), colors[3].toInt());
 
+
     appIsInSoftwareUpdateProcess = new UBSetting(this, "App", "IsInSoftwareUpdateProcess", false);
     appLastSessionDocumentUUID = new UBSetting(this, "App", "LastSessionDocumentUUID", "");
     appLastSessionPageIndex = new UBSetting(this, "App", "LastSessionPageIndex", 0);
     appUseMultiscreen = new UBSetting(this, "App", "UseMusliscreenMode", true);
-
     appStartupHintsEnabled = new UBSetting(this,"App","EnableStartupHints",true);
-
     appStartMode = new UBSetting(this, "App", "StartMode", "");
 
     featureSliderPosition = new UBSetting(this, "Board", "FeatureSliderPosition", 40);
@@ -286,11 +281,8 @@ void UBSettings::init()
 
     boardPenPressureSensitive = new UBSetting(this, "Board", "PenPressureSensitive", true);
     boardMarkerPressureSensitive = new UBSetting(this, "Board", "MarkerPressureSensitive", false);
-
     boardUseHighResTabletEvent = new UBSetting(this, "Board", "UseHighResTabletEvent", true);
-
     boardKeyboardPaletteKeyBtnSize = new UBSetting(this, "Board", "KeyboardPaletteKeyBtnSize", "16x16");
-
 
     cacheKeepAspectRatio = new UBSetting(this, "Cache", "KeepAspectRatio", true);
     cacheMode = new UBSetting(this, "Cache", "CasheMode", 0);
@@ -299,8 +291,8 @@ void UBSettings::init()
 
     ValidateKeyboardPaletteKeyBtnSize();
 
-    // Issue 1684 - CFA - 20131127 : default page size = screen size no ?
-    pageSize = new UBSetting(this, "Board", "DefaultPageSize", documentSizes.value(DocumentSizeRatio::Ratio4_3));
+    //Removed!
+    pageSize = new UBSetting(this, "Board", "WidePageSize", documentSizes.value(DocumentSizeRatio::Ratio16_10));
     //pageSize = new UBSetting(this, "Board", "DefaultPageSize", mainScreenGeometry.size());
 
     pageDpi = new UBSetting(this, "Board", "pageDpi", 0);
@@ -347,10 +339,10 @@ void UBSettings::init()
 
     bool defaultShowPageImmediatelyOnMirroredScreen = true;
 
-#if defined(Q_WS_X11)
-    // screen duplication is very slow on X11
-    defaultShowPageImmediatelyOnMirroredScreen = false;
-#endif
+    #if defined(Q_WS_X11)
+        // screen duplication is very slow on X11
+        defaultShowPageImmediatelyOnMirroredScreen = false;
+    #endif
 
     webShowPageImmediatelyOnMirroredScreen = new UBSetting(this, "Web", "ShowPageImediatelyOnMirroredScreen", defaultShowPageImmediatelyOnMirroredScreen);
 
@@ -375,10 +367,10 @@ void UBSettings::init()
 
     int defaultRefreshRateInFramePerSecond = 8;
 
-#if defined(Q_WS_X11)
-    // screen duplication is very slow on X11
-    defaultRefreshRateInFramePerSecond = 2;
-#endif
+    #if defined(Q_WS_X11)
+        // screen duplication is very slow on X11
+        defaultRefreshRateInFramePerSecond = 2;
+    #endif
 
     mirroringRefreshRateInFps = new UBSetting(this, "Mirroring", "RefreshRateInFramePerSecond", QVariant(defaultRefreshRateInFramePerSecond));
 
@@ -471,7 +463,6 @@ QVariant UBSettings::value ( const QString & key, const QVariant & defaultValue)
     return mUserSettings->value(key, sAppSettings->value(key, defaultValue));
 }
 
-
 void UBSettings::setValue (const QString & key, const QVariant & value)
 {
     mUserSettings->setValue(key, value);
@@ -483,7 +474,6 @@ int UBSettings::penWidthIndex()
     return value("Board/PenLineWidthIndex", 0).toInt();
 }
 
-
 void UBSettings::setPenWidthIndex(int index)
 {
     if (index != penWidthIndex())
@@ -491,7 +481,6 @@ void UBSettings::setPenWidthIndex(int index)
         setValue("Board/PenLineWidthIndex", index);
     }
 }
-
 
 qreal UBSettings::currentPenWidth()
 {
@@ -518,12 +507,10 @@ qreal UBSettings::currentPenWidth()
     return width;
 }
 
-
 int UBSettings::penColorIndex()
 {
     return value("Board/PenColorIndex", 0).toInt();
 }
-
 
 void UBSettings::setPenColorIndex(int index)
 {
@@ -533,19 +520,16 @@ void UBSettings::setPenColorIndex(int index)
     }
 }
 
-
 QColor UBSettings::currentPenColor()
 {
     return penColor(isDarkBackground());
 }
-
 
 QColor UBSettings::penColor(bool onDarkBackground)
 {
     QList<QColor> colors = penColors(onDarkBackground);
     return colors.at(penColorIndex());
 }
-
 
 QList<QColor> UBSettings::penColors(bool onDarkBackground)
 {
@@ -565,7 +549,6 @@ int UBSettings::markerWidthIndex()
     return value("Board/MarkerLineWidthIndex", 0).toInt();
 }
 
-
 void UBSettings::setMarkerWidthIndex(int index)
 {
     if (index != markerWidthIndex())
@@ -573,7 +556,6 @@ void UBSettings::setMarkerWidthIndex(int index)
         setValue("Board/MarkerLineWidthIndex", index);
     }
 }
-
 
 qreal UBSettings::currentMarkerWidth()
 {
@@ -600,12 +582,10 @@ qreal UBSettings::currentMarkerWidth()
     return width;
 }
 
-
 int UBSettings::markerColorIndex()
 {
     return value("Board/MarkerColorIndex", 0).toInt();
 }
-
 
 void UBSettings::setMarkerColorIndex(int index)
 {
@@ -615,19 +595,16 @@ void UBSettings::setMarkerColorIndex(int index)
     }
 }
 
-
 QColor UBSettings::currentMarkerColor()
 {
     return markerColor(isDarkBackground());
 }
-
 
 QColor UBSettings::markerColor(bool onDarkBackground)
 {
     QList<QColor> colors = markerColors(onDarkBackground);
     return colors.at(markerColorIndex());
 }
-
 
 QList<QColor> UBSettings::markerColors(bool onDarkBackground)
 {
@@ -641,9 +618,8 @@ QList<QColor> UBSettings::markerColors(bool onDarkBackground)
     }
 }
 
-//----------------------------------------//
-// eraser
 
+// eraser
 int UBSettings::eraserWidthIndex()
 {
     return value("Board/EraserCircleWidthIndex", 1).toInt();
@@ -709,24 +685,22 @@ qreal UBSettings::currentEraserWidth()
     return width;
 }
 
+
 bool UBSettings::isDarkBackground()
 {
     return value("Board/DarkBackground", 0).toBool();
 }
-
 
 bool UBSettings::isCrossedBackground()
 {
     return value("Board/CrossedBackground", 0).toBool();
 }
 
-
 void UBSettings::setDarkBackground(bool isDarkBackground)
 {
     setValue("Board/DarkBackground", isDarkBackground);
     emit colorContextChanged();
 }
-
 
 void UBSettings::setCrossedBackground(bool isCrossedBackground)
 {
@@ -739,18 +713,15 @@ void UBSettings::setPenPressureSensitive(bool sensitive)
     boardPenPressureSensitive->set(sensitive);
 }
 
-
 void UBSettings::setMarkerPressureSensitive(bool sensitive)
 {
     boardMarkerPressureSensitive->set(sensitive);
 }
 
-
 bool UBSettings::isStylusPaletteVisible()
 {
     return value("Board/StylusPaletteIsVisible", true).toBool();
 }
-
 
 void UBSettings::setStylusPaletteVisible(bool visible)
 {
@@ -763,18 +734,15 @@ QString UBSettings::fontFamily()
     return value("Board/FontFamily", sDefaultFontFamily).toString();
 }
 
-
 void UBSettings::setFontFamily(const QString &family)
 {
     setValue("Board/FontFamily", family);
 }
 
-
 int UBSettings::fontPixelSize()
 {
     return value("Board/FontPixelSize", sDefaultFontPixelSize).toInt();
 }
-
 
 void UBSettings::setFontPixelSize(int pixelSize)
 {
@@ -796,18 +764,15 @@ bool UBSettings::isBoldFont()
     return value("Board/FontIsBold", false).toBool();
 }
 
-
 void UBSettings::setBoldFont(bool bold)
 {
     setValue("Board/FontIsBold", bold);
 }
 
-
 bool UBSettings::isItalicFont()
 {
     return value("Board/FontIsItalic", false).toBool();
 }
-
 
 void UBSettings::setItalicFont(bool italic)
 {
@@ -846,7 +811,6 @@ QString UBSettings::userDataDirectory()
     return dataDirPath;
 }
 
-
 QString UBSettings::userImageDirectory()
 {
     static QString imageDirectory = "";
@@ -866,7 +830,6 @@ QString UBSettings::userImageDirectory()
     }
     return imageDirectory;
 }
-
 
 QString UBSettings::userVideoDirectory()
 {
@@ -1223,7 +1186,6 @@ QNetworkProxy* UBSettings::httpProxy()
     return proxy;
 }
 
-
 void UBSettings::setPassword(const QString& id, const QString& password)
 {
     QString encrypted = UBCryptoUtils::instance()->symetricEncrypt(password);
@@ -1231,12 +1193,10 @@ void UBSettings::setPassword(const QString& id, const QString& password)
     mUserSettings->setValue(QString("Vault/") + id, encrypted);
 }
 
-
 void UBSettings::removePassword(const QString& id)
 {
     mUserSettings->remove(QString("Vault/") + id);
 }
-
 
 QString UBSettings::password(const QString& id)
 {
@@ -1257,7 +1217,6 @@ QString UBSettings::proxyUsername()
     return password(idUsername);
 }
 
-
 void UBSettings::setProxyUsername(const QString& username)
 {
     QString idUsername = "http.proxy.user";
@@ -1268,13 +1227,11 @@ void UBSettings::setProxyUsername(const QString& username)
         removePassword(idUsername);
 }
 
-
 QString UBSettings::proxyPassword()
 {
     QString idPassword = "http.proxy.pass";
     return password(idPassword);
 }
-
 
 void UBSettings::setProxyPassword(const QString& password)
 {
@@ -1311,6 +1268,7 @@ void UBSettings::setCommunityPersistence(const bool persistence)
 {
     communityCredentialsPersistence->set(QVariant(persistence));
 }
+
 
 int UBSettings::libraryIconSize(){
     return libIconSize->get().toInt();

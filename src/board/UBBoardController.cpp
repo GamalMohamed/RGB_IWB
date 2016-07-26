@@ -130,6 +130,7 @@ UBBoardController::UBBoardController(UBMainWindow* mainWindow)
     int dpiCommon = (desktop->physicalDpiX() + desktop->physicalDpiY()) / 2;
     int sPixelsPerMillimeter = qRound(dpiCommon / UBGeometryUtils::inchSize);
     UBSettings::settings()->crossSize = 10*sPixelsPerMillimeter;
+
 }
 
 
@@ -165,7 +166,6 @@ void UBBoardController::init()
 
     undoRedoStateChange(true);
 
-    //EV-7 - NNE - 20131231
     mShapeFactory.init();
 }
 
@@ -193,9 +193,7 @@ void UBBoardController::setupViews()
     mControlView = new UBBoardView(this, mControlContainer, true, false);
     mControlView->setInteractive(true);
     mControlView->setMouseTracking(true);
-
     mControlView->grabGesture(Qt::SwipeGesture);
-
     mControlView->setTransformationAnchor(QGraphicsView::NoAnchor);
 
     mControlLayout->addWidget(mControlView);
@@ -204,9 +202,8 @@ void UBBoardController::setupViews()
 
     connect(mControlView, SIGNAL(resized(QResizeEvent*)), this, SLOT(boardViewResized(QResizeEvent*)));
 
-    // TODO UB 4.x Optimization do we have to create the display view even if their is
-    // only 1 screen
-    //
+    // TODO UB 4.x Optimization do we have to create the display view even if their is only 1 screen
+
     mDisplayView = new UBBoardView(this, UBItemLayerType::FixedBackground, UBItemLayerType::Tool, 0);
     mDisplayView->setInteractive(false);
     mDisplayView->setTransformationAnchor(QGraphicsView::NoAnchor);
@@ -215,15 +212,14 @@ void UBBoardController::setupViews()
     mMessageWindow->setCustomPosition(true);
     mMessageWindow->hide();
 
-//Issue retours 2.4RC1 - CFA - 20140218 : show warning if not official release
-#ifndef QT_DEBUG
-    QString version_type(VERSION_TYPE);
-    QString version_patch(VERSION_PATCH);
-    if (version_type.contains("a") || version_type.contains("b") || !QRegExp("\\d*").exactMatch(version_patch))
-    {
-        mMainWindow->warning(tr("Warning"), tr("This is not a final release. Please use it only for testing."));
-    }
-#endif
+    #ifndef QT_DEBUG
+        QString version_type(VERSION_TYPE);
+        QString version_patch(VERSION_PATCH);
+        if (version_type.contains("a") || version_type.contains("b") || !QRegExp("\\d*").exactMatch(version_patch))
+        {
+            mMainWindow->warning(tr("Warning"), tr("This is not a final release. Please use it only for testing."));
+        }
+    #endif
 
     mPaletteManager = new UBBoardPaletteManager(mControlContainer, this);
     connect(this, SIGNAL(activeSceneChanged()), mPaletteManager, SLOT(activeSceneChanged()));
@@ -294,6 +290,7 @@ QRectF UBBoardController::controlGeometry()
 
 void UBBoardController::setupToolbar()
 {
+    /*
     UBSettings *settings = UBSettings::settings();
 
     // Setup color choice widget
@@ -363,10 +360,12 @@ void UBBoardController::setupToolbar()
 
     UBApplication::app()->insertSpaceToToolbarBeforeAction(mMainWindow->boardToolBar, mMainWindow->actionBoard);
     UBApplication::app()->insertSpaceToToolbarBeforeAction(mMainWindow->tutorialToolBar, mMainWindow->actionBoard);
+    */
+    UBApplication::app()->insertSpaceToToolbarBeforeAction(mMainWindow->boardToolBar, mMainWindow->actionUndo);
 
     UBApplication::app()->decorateActionMenu(mMainWindow->actionMenu);
 
-    mMainWindow->actionBoard->setVisible(false);
+    //mMainWindow->actionBoard->setVisible(false);
 
     mMainWindow->webToolBar->hide();
     mMainWindow->documentToolBar->hide();
@@ -861,7 +860,7 @@ void UBBoardController::clearSceneAnnotation()
     }
 }
 
-// Issue 1684 - CFA - 20131120
+
 void UBBoardController::setImageBackground(UBFeatureBackgroundDisposition disposition)
 {
     downloadURL(mActiveScene->backgroundObjectUrl(), QString(), QPointF(), QSize(), true, false, disposition);
@@ -1071,7 +1070,6 @@ void UBBoardController::handScroll(qreal dx, qreal dy)
     emit controlViewportChanged();
 }
 
-// Issue 1598/1605 - CFA - 20131028
 void UBBoardController::persistViewPositionOnCurrentScene()
 {
     QRect rect = mControlView->rect();
@@ -1079,7 +1077,7 @@ void UBBoardController::persistViewPositionOnCurrentScene()
     QPointF viewRelativeCenter = mControlView->mapToScene(center);
     mActiveScene->setLastCenter(viewRelativeCenter);
 }
-// Fin issue 1598/1605 - CFA - 20131028
+
 
 void UBBoardController::previousScene()
 {
@@ -1097,7 +1095,6 @@ void UBBoardController::previousScene()
     emit pageChanged();
 }
 
-
 void UBBoardController::nextScene()
 {
     if (mActiveSceneIndex < selectedDocument()->pageCount() - 1)
@@ -1113,7 +1110,6 @@ void UBBoardController::nextScene()
     updateActionStates();
     emit pageChanged();
 }
-
 
 void UBBoardController::firstScene()
 {
@@ -1133,7 +1129,6 @@ void UBBoardController::firstScene()
     emit pageChanged();
 }
 
-
 void UBBoardController::lastScene()
 {
 
@@ -1150,6 +1145,7 @@ void UBBoardController::lastScene()
     updateActionStates();
     emit pageChanged();
 }
+
 
 void UBBoardController::groupButtonClicked()
 {
@@ -1863,6 +1859,7 @@ UBItem *UBBoardController::downloadFinished(bool pSuccess, QUrl sourceUrl, QUrl 
     return NULL;
 }
 
+
 void UBBoardController::setActiveDocumentScene(int pSceneIndex)
 {
     setActiveDocumentScene(selectedDocument(), pSceneIndex);
@@ -2384,7 +2381,6 @@ void UBBoardController::setWidePageSize16_10(bool checked)
     }
 }
 
-
 void UBBoardController::setRegularPageSize(bool checked)
 {
     Q_UNUSED(checked);
@@ -2399,17 +2395,17 @@ void UBBoardController::setRegularPageSize(bool checked)
     }
 }
 
-
 void UBBoardController::setPageSize(QSize newSize)
 {
     if (mActiveScene->nominalSize() != newSize)
     {
         mActiveScene->setNominalSize(newSize);
-        saveViewState();
 
+        saveViewState();
         updateSystemScaleFactor();
         updatePageSizeState();
         adjustDisplayViews();
+
 
         // Issue 1684 - CFA - 20131128 : hack to force qgraphicsview to refresh
         handScroll(1.f, 0.f);
@@ -2427,8 +2423,8 @@ void UBBoardController::setPageSize(QSize newSize)
                 mosaicImageBackground();
             else if (item.backgroundDisposition() == Fill)
                 fillImageBackground();
-            else // Extend
-                extendImageBackground();
+            else
+                extendImageBackground(); // Extend
 
         }
         else if (mActiveScene->hasBackground())
@@ -2436,13 +2432,23 @@ void UBBoardController::setPageSize(QSize newSize)
             setImageBackground(mActiveScene->backgroundObjectDisposition());
         }
 
-        // Fin Issue 1684 - CFA - 20131128
-
         selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
-
         UBSettings::settings()->pageSize->set(newSize);
     }
 }
+
+void UBBoardController::setFinalPageSize()
+{
+    mActiveScene->setNominalSize(1000000,1000000);
+
+    saveViewState();
+    adjustDisplayViews();
+
+    handScroll(1.f, 0.f);
+    handScroll(-1.f, 0.f);
+    reloadThumbnails();
+}
+
 
 void UBBoardController::notifyCache(bool visible)
 {
@@ -2485,7 +2491,7 @@ void UBBoardController::saveViewState()
         mActiveScene->setViewState(UBGraphicsScene::SceneViewState(currentZoom(),
                                                                    mControlView->horizontalScrollBar()->value(),
                                                                    mControlView->verticalScrollBar()->value(),
-                                                                   mActiveScene->lastCenter()));// Issue 1598/1605 - CFA - 20131028
+                                                                   mActiveScene->lastCenter()));
     }
 }
 

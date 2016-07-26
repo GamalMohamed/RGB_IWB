@@ -143,7 +143,9 @@ UBActionPalette::~UBActionPalette()
 void UBActionPalette::setButtonIconSize(const QSize& size)
 {
     foreach(QToolButton* button, mButtons)
+    {
         button->setIconSize(size);
+    }
 
     mButtonSize = size;
 }
@@ -158,7 +160,6 @@ void UBActionPalette::groupActions()
         mButtonGroup->addButton(button, i);
         ++i;
     }
-
     connect(mButtonGroup, SIGNAL(buttonClicked(int)), this, SIGNAL(buttonGroupClicked(int)));
 }
 

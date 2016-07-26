@@ -134,11 +134,8 @@ void UBBoardPaletteManager::setupLayout()
 void UBBoardPaletteManager::setupDockPaletteWidgets()
 {
 
-    //------------------------------------------------//
     // Create the widgets for the dock palettes
-
     mpCachePropWidget = new UBCachePropertiesWidget();
-
     mpDownloadWidget = new UBDockDownloadWidget();
 
     // Add the dock palettes
@@ -149,22 +146,23 @@ void UBBoardPaletteManager::setupDockPaletteWidgets()
     mLeftPalette->registerWidget(mpPageNavigWidget);
     mLeftPalette->addTab(mpPageNavigWidget);
 
-    if(UBSettings::settings()->teacherGuidePageZeroActivated->get().toBool() || UBSettings::settings()->teacherGuideLessonPagesActivated->get().toBool()){
-
+    if(UBSettings::settings()->teacherGuidePageZeroActivated->get().toBool() ||
+            UBSettings::settings()->teacherGuideLessonPagesActivated->get().toBool())
+    {
         mpTeacherGuideWidget = new UBDockTeacherGuideWidget();
         mLeftPalette->registerWidget(mpTeacherGuideWidget);
         mLeftPalette->addTab(mpTeacherGuideWidget);
     }
 
-    //issue 1682 - NNE - 20131218
     mTeacherResources = new UBDockResourcesWidget;
     mLeftPalette->registerWidget(mTeacherResources);
     mLeftPalette->addTab(mTeacherResources);
-    //issue 1682 - NNE - 20131218 : END
 
     mLeftPalette->connectSignals();
 
+
     mRightPalette = new UBRightPalette(mContainer);
+
     // RIGHT palette widgets
     mpFeaturesWidget = new UBFeaturesWidget();
     mRightPalette->registerWidget(mpFeaturesWidget);
@@ -186,82 +184,24 @@ void UBBoardPaletteManager::setupDockPaletteWidgets()
 
 }
 
-void UBBoardPaletteManager::slot_changeMainMode(UBApplicationController::MainMode mainMode)
-{
-//    Board = 0, Internet, Document, Tutorial, ParaschoolEditor, WebDocument
-
-    switch( mainMode )
-    {
-        case UBApplicationController::Board:
-            {
-                // call changeMode only when switch NOT from desktop mode
-                if(!UBApplication::applicationController->isShowingDesktop())
-                    changeMode(eUBDockPaletteWidget_BOARD);
-            }
-            break;
-
-        case UBApplicationController::Tutorial:
-            {
-                if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != NULL)
-                    mKeyboardPalette->hide();
-            }
-            break;
-
-        case UBApplicationController::Internet:
-            changeMode(eUBDockPaletteWidget_WEB);
-            break;
-
-        case UBApplicationController::Document:
-            changeMode(eUBDockPaletteWidget_DOCUMENT);
-            break;
-
-        default:
-            {
-                if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != NULL)
-                    mKeyboardPalette->hide();
-            }
-            break;
-    }
-}
-
-void UBBoardPaletteManager::slot_changeDesktopMode(bool isDesktop)
-{
-    UBApplicationController::MainMode currMode = UBApplication::applicationController->displayMode();
-    if(!isDesktop)
-    {
-        switch( currMode )
-        {
-            case UBApplicationController::Board:
-                changeMode(eUBDockPaletteWidget_BOARD);
-                break;
-
-            default:
-                break;
-        }
-    }
-    else
-        changeMode(eUBDockPaletteWidget_DESKTOP);
-}
-
 void UBBoardPaletteManager::setupPalettes()
 {
 
     if (UBPlatformUtils::hasVirtualKeyboard())
     {
         mKeyboardPalette = new UBKeyboardPalette(0);
-#ifndef Q_WS_WIN
-        connect(mKeyboardPalette, SIGNAL(closed()), mKeyboardPalette, SLOT(onDeactivated()));
-#endif
+        #ifndef Q_WS_WIN
+                connect(mKeyboardPalette, SIGNAL(closed()), mKeyboardPalette, SLOT(onDeactivated()));
+        #endif
     }
 
 
     setupDockPaletteWidgets();
 
-
     // Add the other palettes
     mStylusPalette = new UBStylusPalette(mContainer, UBSettings::settings()->appToolBarOrientationVertical->get().toBool() ? Qt::Vertical : Qt::Horizontal);
     connect(mStylusPalette, SIGNAL(stylusToolDoubleClicked(int)), UBApplication::boardController, SLOT(stylusToolDoubleClicked(int)));
-    mStylusPalette->show(); // always show stylus palette at startup
+    mStylusPalette->show(); // Show stylus palette at startup
 
     mDrawingPalette = new UBDrawingPalette(mContainer, UBSettings::settings()->appDrawingPaletteOrientationHorizontal->get().toBool() ? Qt::Horizontal : Qt::Vertical);
     mDrawingPalette->hide();
@@ -272,8 +212,8 @@ void UBBoardPaletteManager::setupPalettes()
 
     mTipPalette = new UBStartupHintsPalette(mContainer);
 
-    QList<QAction*> backgroundsActions;
 
+    QList<QAction*> backgroundsActions;
     backgroundsActions << UBApplication::mainWindow->actionPlainLightBackground;
     backgroundsActions << UBApplication::mainWindow->actionCrossedLightBackground;
     backgroundsActions << UBApplication::mainWindow->actionPlainDarkBackground;
@@ -287,8 +227,8 @@ void UBBoardPaletteManager::setupPalettes()
     mBackgroundsPalette->adjustSizeAndPosition();
     mBackgroundsPalette->hide();
 
-    QList<QAction*> addItemActions;
 
+    QList<QAction*> addItemActions;
     addItemActions << UBApplication::mainWindow->actionAddItemToCurrentPage;
     addItemActions << UBApplication::mainWindow->actionAddItemToNewPage;
     addItemActions << UBApplication::mainWindow->actionAddItemToLibrary;
@@ -301,8 +241,8 @@ void UBBoardPaletteManager::setupPalettes()
     mAddItemPalette->adjustSizeAndPosition();
     mAddItemPalette->hide();
 
-    QList<QAction*> eraseActions;
 
+    QList<QAction*> eraseActions;
     eraseActions << UBApplication::mainWindow->actionEraseAnnotations;
     eraseActions << UBApplication::mainWindow->actionEraseItems;
     eraseActions << UBApplication::mainWindow->actionClearPage;
@@ -316,8 +256,8 @@ void UBBoardPaletteManager::setupPalettes()
     mErasePalette->adjustSizeAndPosition();
     mErasePalette->hide();
 
-    QList<QAction*> pageActions;
 
+    QList<QAction*> pageActions;
     pageActions << UBApplication::mainWindow->actionNewPage;
     pageActions << UBApplication::mainWindow->actionDuplicatePage;
     pageActions << UBApplication::mainWindow->actionImportPage;
@@ -330,9 +270,9 @@ void UBBoardPaletteManager::setupPalettes()
     mPagePalette->adjustSizeAndPosition();
     mPagePalette->hide();
 
+
     // Issue 1684 - CFA - 20131120
     QList<QAction*> imageBackgroundActions;
-
     imageBackgroundActions << UBApplication::mainWindow->actionCenterImageBackground;
     UBApplication::mainWindow->actionCenterImageBackground->setIcon(QIcon(":/images/imageBackgroundPalette/centerBackground.png"));
     imageBackgroundActions << UBApplication::mainWindow->actionAdjustImageBackground;
@@ -351,96 +291,9 @@ void UBBoardPaletteManager::setupPalettes()
     mImageBackgroundPalette->setClosable(true);
     mImageBackgroundPalette->adjustSizeAndPosition();
     mImageBackgroundPalette->hide();
-    // Fin Issue 1684 - CFA - 20131120
+
 
     connect(UBSettings::settings()->appToolBarOrientationVertical, SIGNAL(changed(QVariant)), this, SLOT(changeStylusPaletteOrientation(QVariant)));
-}
-
-void UBBoardPaletteManager::pagePaletteButtonPressed()
-{
-    mPageButtonPressedTime = QTime::currentTime();
-
-    mPendingPageButtonPressed = true;
-    QTimer::singleShot(1000, this, SLOT(pagePaletteButtonReleased()));
-}
-
-void UBBoardPaletteManager::pagePaletteButtonReleased()
-{
-    if (mPendingPageButtonPressed)
-    {
-        if( mPageButtonPressedTime.msecsTo(QTime::currentTime()) > 900)
-        {
-            // The palette is reinstanciated because the duplication depends on the current scene
-            delete(mPagePalette);
-            mPagePalette = 0;
-            QList<QAction*>pageActions;
-            pageActions << UBApplication::mainWindow->actionNewPage;
-            UBBoardController* boardController = UBApplication::boardController;
-            if(UBApplication::documentController->pageCanBeDuplicated(UBDocumentContainer::pageFromSceneIndex(boardController->activeSceneIndex()))){
-                pageActions << UBApplication::mainWindow->actionDuplicatePage;
-            }
-            pageActions << UBApplication::mainWindow->actionImportPage;
-
-            mPagePalette = new UBActionPalette(pageActions, Qt::Horizontal , mContainer);
-            mPagePalette->setButtonIconSize(QSize(128, 128));
-            mPagePalette->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-            mPagePalette->groupActions();
-            mPagePalette->setClosable(true);
-
-            // As we recreate the pagePalette every time, we must reconnect the slots
-            connect(UBApplication::mainWindow->actionNewPage, SIGNAL(triggered()), mPagePalette, SLOT(close()));
-            connect(UBApplication::mainWindow->actionDuplicatePage, SIGNAL(triggered()), mPagePalette, SLOT(close()));
-            connect(UBApplication::mainWindow->actionImportPage, SIGNAL(triggered()), mPagePalette, SLOT(close()));
-            connect(mPagePalette, SIGNAL(closed()), this, SLOT(pagePaletteClosed()));
-
-            togglePagePalette(true);
-        }
-        else
-        {
-            UBApplication::mainWindow->actionNewPage->trigger();
-        }
-
-        mPendingPageButtonPressed = false;
-    }
-}
-
-void UBBoardPaletteManager::erasePaletteButtonPressed()
-{
-    mEraseButtonPressedTime = QTime::currentTime();
-
-    mPendingEraseButtonPressed = true;
-    QTimer::singleShot(1000, this, SLOT(erasePaletteButtonReleased()));
-}
-
-
-void UBBoardPaletteManager::erasePaletteButtonReleased()
-{
-    if (mPendingEraseButtonPressed)
-    {
-        if( mEraseButtonPressedTime.msecsTo(QTime::currentTime()) > 900)
-        {
-            toggleErasePalette(true);
-        }
-        else
-        {
-            UBApplication::mainWindow->actionClearPage->trigger();
-        }
-
-        mPendingEraseButtonPressed = false;
-    }
-}
-
-void UBBoardPaletteManager::linkClicked(const QUrl& url)
-{
-      UBApplication::applicationController->showInternet();
-      UBApplication::webController->loadUrl(url);
-}
-
-
-void UBBoardPaletteManager::purchaseLinkActivated(const QString& link)
-{
-    UBApplication::applicationController->showInternet();
-    UBApplication::webController->loadUrl(QUrl(link));
 }
 
 void UBBoardPaletteManager::connectPalettes()
@@ -531,6 +384,151 @@ void UBBoardPaletteManager::connectPalettes()
 }
 
 
+void UBBoardPaletteManager::slot_changeMainMode(UBApplicationController::MainMode mainMode)
+{
+//    Board = 0, Internet, Document, Tutorial, ParaschoolEditor, WebDocument
+
+    switch( mainMode )
+    {
+        case UBApplicationController::Board:
+            {
+                // call changeMode only when switch NOT from desktop mode
+                if(!UBApplication::applicationController->isShowingDesktop())
+                    changeMode(eUBDockPaletteWidget_BOARD);
+            }
+            break;
+
+        case UBApplicationController::Tutorial:
+            {
+                if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != NULL)
+                    mKeyboardPalette->hide();
+            }
+            break;
+
+        case UBApplicationController::Internet:
+            changeMode(eUBDockPaletteWidget_WEB);
+            break;
+
+        case UBApplicationController::Document:
+            changeMode(eUBDockPaletteWidget_DOCUMENT);
+            break;
+
+        default:
+            {
+                if (UBPlatformUtils::hasVirtualKeyboard() && mKeyboardPalette != NULL)
+                    mKeyboardPalette->hide();
+            }
+            break;
+    }
+}
+
+void UBBoardPaletteManager::slot_changeDesktopMode(bool isDesktop)
+{
+    UBApplicationController::MainMode currMode = UBApplication::applicationController->displayMode();
+    if(!isDesktop)
+    {
+        switch( currMode )
+        {
+            case UBApplicationController::Board:
+                changeMode(eUBDockPaletteWidget_BOARD);
+                break;
+
+            default:
+                break;
+        }
+    }
+    else
+        changeMode(eUBDockPaletteWidget_DESKTOP);
+}
+
+
+void UBBoardPaletteManager::pagePaletteButtonPressed()
+{
+    mPageButtonPressedTime = QTime::currentTime();
+
+    mPendingPageButtonPressed = true;
+    QTimer::singleShot(1000, this, SLOT(pagePaletteButtonReleased()));
+}
+
+void UBBoardPaletteManager::pagePaletteButtonReleased()
+{
+    if (mPendingPageButtonPressed)
+    {
+        if( mPageButtonPressedTime.msecsTo(QTime::currentTime()) > 900)
+        {
+            // The palette is reinstanciated because the duplication depends on the current scene
+            delete(mPagePalette);
+            mPagePalette = 0;
+            QList<QAction*>pageActions;
+            pageActions << UBApplication::mainWindow->actionNewPage;
+            UBBoardController* boardController = UBApplication::boardController;
+            if(UBApplication::documentController->pageCanBeDuplicated(UBDocumentContainer::pageFromSceneIndex(boardController->activeSceneIndex()))){
+                pageActions << UBApplication::mainWindow->actionDuplicatePage;
+            }
+            pageActions << UBApplication::mainWindow->actionImportPage;
+
+            mPagePalette = new UBActionPalette(pageActions, Qt::Horizontal , mContainer);
+            mPagePalette->setButtonIconSize(QSize(128, 128));
+            mPagePalette->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+            mPagePalette->groupActions();
+            mPagePalette->setClosable(true);
+
+            // As we recreate the pagePalette every time, we must reconnect the slots
+            connect(UBApplication::mainWindow->actionNewPage, SIGNAL(triggered()), mPagePalette, SLOT(close()));
+            connect(UBApplication::mainWindow->actionDuplicatePage, SIGNAL(triggered()), mPagePalette, SLOT(close()));
+            connect(UBApplication::mainWindow->actionImportPage, SIGNAL(triggered()), mPagePalette, SLOT(close()));
+            connect(mPagePalette, SIGNAL(closed()), this, SLOT(pagePaletteClosed()));
+
+            togglePagePalette(true);
+        }
+        else
+        {
+            UBApplication::mainWindow->actionNewPage->trigger();
+        }
+
+        mPendingPageButtonPressed = false;
+    }
+}
+
+void UBBoardPaletteManager::erasePaletteButtonPressed()
+{
+    mEraseButtonPressedTime = QTime::currentTime();
+
+    mPendingEraseButtonPressed = true;
+    QTimer::singleShot(1000, this, SLOT(erasePaletteButtonReleased()));
+}
+
+void UBBoardPaletteManager::erasePaletteButtonReleased()
+{
+    if (mPendingEraseButtonPressed)
+    {
+        if( mEraseButtonPressedTime.msecsTo(QTime::currentTime()) > 900)
+        {
+            toggleErasePalette(true);
+        }
+        else
+        {
+            UBApplication::mainWindow->actionClearPage->trigger();
+        }
+
+        mPendingEraseButtonPressed = false;
+    }
+}
+
+
+void UBBoardPaletteManager::linkClicked(const QUrl& url)
+{
+      UBApplication::applicationController->showInternet();
+      UBApplication::webController->loadUrl(url);
+}
+
+void UBBoardPaletteManager::purchaseLinkActivated(const QString& link)
+{
+    UBApplication::applicationController->showInternet();
+    UBApplication::webController->loadUrl(QUrl(link));
+}
+
+
 bool isFirstResized = true;
 void UBBoardPaletteManager::containerResized()
 {
@@ -573,7 +571,6 @@ void UBBoardPaletteManager::containerResized()
         mLeftPalette->resize(mLeftPalette->width()-1, mContainer->height());
 }
 
-
 void UBBoardPaletteManager::changeBackground()
 {
     if (UBApplication::mainWindow->actionCrossedLightBackground->isChecked())
@@ -587,7 +584,6 @@ void UBBoardPaletteManager::changeBackground()
 
     UBApplication::mainWindow->actionBackgrounds->setChecked(false);
 }
-
 
 void UBBoardPaletteManager::activeSceneChanged()
 {
@@ -620,7 +616,6 @@ void UBBoardPaletteManager::activeSceneChanged()
         connect(mBackgroundsPalette, SIGNAL(mouseEntered()), activeScene, SLOT(hideEraser()));
 }
 
-
 void UBBoardPaletteManager::toggleBackgroundPalette(bool checked)
 {
     mBackgroundsPalette->setVisible(checked);
@@ -633,7 +628,6 @@ void UBBoardPaletteManager::toggleBackgroundPalette(bool checked)
         mBackgroundsPalette->adjustSizeAndPosition();
     }
 }
-
 
 void UBBoardPaletteManager::backgroundPaletteClosed()
 {
@@ -650,7 +644,6 @@ void UBBoardPaletteManager::toggleDrawingPalette(bool checked)
     mDrawingPalette->setVisible(checked);
 }
 
-
 void UBBoardPaletteManager::toggleErasePalette(bool checked)
 {
     mErasePalette->setVisible(checked);
@@ -663,14 +656,11 @@ void UBBoardPaletteManager::toggleErasePalette(bool checked)
     }
 }
 
-
 void UBBoardPaletteManager::erasePaletteClosed()
 {
     UBApplication::mainWindow->actionErase->setChecked(false);
 }
 
-
-// Issue 1684 - CFA - 20131120
 void UBBoardPaletteManager::toggleImageBackgroundPalette(bool checked, bool isDefault)
 {
     mImageBackgroundPalette->setVisible(checked);
@@ -696,12 +686,10 @@ void UBBoardPaletteManager::togglePagePalette(bool checked)
     }
 }
 
-
 void UBBoardPaletteManager::pagePaletteClosed()
 {
     UBApplication::mainWindow->actionPages->setChecked(false);
 }
-
 
 void UBBoardPaletteManager::tooglePodcastPalette(bool checked)
 {
@@ -944,7 +932,6 @@ void UBBoardPaletteManager::addItem(const QPixmap& pPixmap, const QPointF& pos, 
     mAddItemPalette->adjustSizeAndPosition();
 }
 
-
 void UBBoardPaletteManager::addItemToCurrentPage()
 {
     //Issue NC - CFA - 20140331 : retour au mode board si mode desktop (en mode desktop, displayMode() renvoie Board...)
@@ -965,13 +952,11 @@ void UBBoardPaletteManager::addItemToCurrentPage()
     }
 }
 
-
 void UBBoardPaletteManager::addItemToNewPage()
 {
     UBApplication::boardController->addScene();
     addItemToCurrentPage();
 }
-
 
 void UBBoardPaletteManager::addItemToLibrary()
 {
@@ -1000,6 +985,7 @@ void UBBoardPaletteManager::addItemToLibrary()
 
     mAddItemPalette->hide();
 }
+
 
 void UBBoardPaletteManager::zoomButtonPressed()
 {

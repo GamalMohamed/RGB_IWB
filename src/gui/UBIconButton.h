@@ -28,7 +28,7 @@
 
 class UBIconButton : public QAbstractButton
 {
-    Q_OBJECT;
+    Q_OBJECT
 
     public:
         UBIconButton(QWidget *parent = 0, const QIcon &iconOn = QIcon());

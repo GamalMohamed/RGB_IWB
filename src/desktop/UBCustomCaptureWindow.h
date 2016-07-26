@@ -30,7 +30,7 @@
 class UBCustomCaptureWindow : public QDialog
 {
 
-    Q_OBJECT;
+    Q_OBJECT
 
     public:
         UBCustomCaptureWindow(QWidget *parent = 0);

@@ -33,7 +33,7 @@ class UBActionPaletteButton;
 
 class UBActionPalette : public UBFloatingPalette
 {
-    Q_OBJECT;
+    Q_OBJECT
 
     public:
         UBActionPalette(QList<QAction*> actions, Qt::Orientation orientation = Qt::Vertical, QWidget* parent = 0);
@@ -45,6 +45,7 @@ class UBActionPalette : public UBFloatingPalette
 
         void setButtonIconSize(const QSize& size);
         void setToolButtonStyle(Qt::ToolButtonStyle);
+
 
         QList<QAction*> actions();
         void setActions(QList<QAction*> actions);

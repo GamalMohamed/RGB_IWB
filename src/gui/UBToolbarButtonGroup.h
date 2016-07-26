@@ -29,7 +29,7 @@
 
 class UBToolbarButtonGroup : public QWidget
 {
-    Q_OBJECT;
+    Q_OBJECT
 
     public:
         UBToolbarButtonGroup(QToolBar *toolbar, const QList<QAction*> &actions = QList<QAction*>());

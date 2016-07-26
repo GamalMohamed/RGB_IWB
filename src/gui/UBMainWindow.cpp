@@ -49,7 +49,7 @@ UBMainWindow::UBMainWindow(QWidget *parent, Qt::WindowFlags flags)
     //Setting tooltip colors staticly, since they look not quite well on different color themes
     QPalette toolTipPalette;
     toolTipPalette.setColor(QPalette::ToolTipBase, QColor("#FFFFDC"));
-    toolTipPalette.setColor(QPalette::ToolTipText, Qt::black);
+    toolTipPalette.setColor(QPalette::ToolTipText, Qt::blue);
     QToolTip::setPalette(toolTipPalette);
 
     QWidget* centralWidget = new QWidget(this);

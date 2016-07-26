@@ -116,7 +116,7 @@ void UBPreferencesController::wire()
 
     // main tab
     mPreferencesUI->mainTabWidget->setCurrentWidget(mPreferencesUI->displayTab);
-    mPreferencesUI->versionLabel->setText(tr("version: ") + UBApplication::applicationVersion());
+    mPreferencesUI->versionLabel->setText(tr("Version: ") + UBApplication::applicationVersion());
 
     connect(mPreferencesUI->closeButton, SIGNAL(released()), this, SLOT(close()));
     connect(mPreferencesUI->defaultSettingsButton, SIGNAL(released()), this, SLOT(defaultSettings()));

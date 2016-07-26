@@ -1,26 +1,3 @@
-/*
- * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
- *
- * This file is part of Open-Sankoré.
- *
- * Open-Sankoré is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License,
- * with a specific linking exception for the OpenSSL project's
- * "OpenSSL" library (or with modified versions of it that use the
- * same license as the "OpenSSL" library).
- *
- * Open-Sankoré is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Open-Sankoré.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-
-
 #include "UBApplication.h"
 
 #include <QtGui>
@@ -116,9 +93,9 @@ UBApplication::UBApplication(const QString &id, int &argc, char **argv) : QtSing
 {
     staticMemoryCleaner = new QObject(0); // deleted in UBApplication destructor
 
-    setOrganizationName("RGB");
+    setOrganizationName("RGB System");
     setOrganizationDomain("rgbsystem.net");
-    setApplicationName("RGB");
+    setApplicationName("RGB IWB");
 
     setApplicationVersion(UBVERSION);
 
@@ -145,7 +122,7 @@ UBApplication::UBApplication(const QString &id, int &argc, char **argv) : QtSing
     if (!undoStack)
         undoStack = new QUndoStack(staticMemoryCleaner);
 
-    UBPlatformUtils::init();
+    UBPlatformUtils::init(); //=>initializeKeyboardLayouts()
 
     UBSettings *settings = UBSettings::settings();
 
@@ -206,6 +183,23 @@ UBApplication::~UBApplication()
     delete staticMemoryCleaner;
     staticMemoryCleaner = 0;
 }
+
+void UBApplication::cleanup()
+{
+    if (applicationController) delete applicationController;
+    if (boardController) delete boardController;
+    if (webController) delete webController;
+    if (documentController) delete documentController;
+    if (mUniboardSankoreTransition) delete mUniboardSankoreTransition;
+
+
+    applicationController = NULL;
+    boardController = NULL;
+    webController = NULL;
+    documentController = NULL;
+    mUniboardSankoreTransition = NULL;
+}
+
 
 QString UBApplication::checkLanguageAvailabilityForSankore(QString &language)
 {
@@ -276,7 +270,8 @@ void UBApplication::setupTranslators(QStringList args)
     UBSettings::settings()->init();
 }
 
-//Application Core!
+
+//Application CORE function!
 int UBApplication::exec(const QString& pFileToImport)
 {
     QPixmapCache::setCacheLimit(1024 * 100);
@@ -310,7 +305,7 @@ int UBApplication::exec(const QString& pFileToImport)
 
     connect(mainWindow->actionBoard, SIGNAL(triggered()), this, SLOT(showBoard()));
     connect(mainWindow->actionWeb, SIGNAL(triggered()), this, SLOT(showInternet()));
-    connect(mainWindow->actionDocument, SIGNAL(triggered()), this, SLOT(showDocument()));
+    connect(mainWindow->actionResources, SIGNAL(triggered()), this, SLOT(showDocument()));
     connect(mainWindow->actionQuit, SIGNAL(triggered()), this, SLOT(closing()));
     connect(mainWindow, SIGNAL(closeEvent_Signal(QCloseEvent*)), this, SLOT(closeEvent(QCloseEvent*)));
 
@@ -318,13 +313,12 @@ int UBApplication::exec(const QString& pFileToImport)
     /***********************Setting-up Controllers***********************/
     // Conrollers: Board, Web, document, AppController, Preferences
     boardController = new UBBoardController(mainWindow);
-    boardController->init();
+    boardController->init(); //Where most of GUI is formed <===== TARGET NOW!
 
     webController = new UBWebController(mainWindow);
     documentController = new UBDocumentController(mainWindow);
 
     boardController->paletteManager()->connectToDocumentController();
-
     UBDrawingController::drawingController()->setStylusTool((int)UBStylusTool::Pen);
 
     applicationController = new UBApplicationController(boardController->controlView(),
@@ -336,51 +330,57 @@ int UBApplication::exec(const QString& pFileToImport)
 
     connect(applicationController, SIGNAL(mainModeChanged(UBApplicationController::MainMode)),
             boardController->paletteManager(), SLOT(slot_changeMainMode(UBApplicationController::MainMode)));
-
     connect(applicationController, SIGNAL(desktopMode(bool)),
             boardController->paletteManager(), SLOT(slot_changeDesktopMode(bool)));
-
-
-
     connect(mainWindow->actionDesktop, SIGNAL(triggered(bool)), applicationController, SLOT(showDesktop(bool)));
     connect(mainWindow->actionDesktop, SIGNAL(triggered(bool)), this, SLOT(stopScript()));
-#ifndef Q_WS_MAC
-    connect(mainWindow->actionHideApplication, SIGNAL(triggered()), mainWindow, SLOT(showMinimized()));
-#else
-    connect(mainWindow->actionHideApplication, SIGNAL(triggered()), this, SLOT(showMinimized()));
-#endif
+
+    #ifndef Q_WS_MAC
+        connect(mainWindow->actionHideApplication, SIGNAL(triggered()), mainWindow, SLOT(showMinimized()));
+    #else
+        connect(mainWindow->actionHideApplication, SIGNAL(triggered()), this, SLOT(showMinimized()));
+    #endif
+
 
     mPreferencesController = new UBPreferencesController(mainWindow);
 
     connect(mainWindow->actionPreferences, SIGNAL(triggered()), mPreferencesController, SLOT(show()));
     connect(mainWindow->actionTutorial, SIGNAL(triggered()), applicationController, SLOT(showTutorial()));
     connect(mainWindow->actionSankoreEditor, SIGNAL(triggered()), applicationController, SLOT(showSankoreEditor()));
-    connect(mainWindow->actionCheckUpdate, SIGNAL(triggered()), applicationController, SLOT(checkUpdateRequest()));
+
+
 
     toolBarDisplayTextChanged(UBSettings::settings()->appToolBarDisplayText->get()); // Issue corrected by 'x49' on GitHub - 20140618 : toolbar text state was not read from configuration.
     toolBarPositionChanged(UBSettings::settings()->appToolBarPositionedAtTop->get());
 
-    bool bUseMultiScreen = UBSettings::settings()->appUseMultiscreen->get().toBool();
-    mainWindow->actionMultiScreen->setChecked(bUseMultiScreen);
+    /***Deprecated features (Removing page sizing,Multiscreen, Updates)***/
+    /*
     connect(mainWindow->actionMultiScreen, SIGNAL(triggered(bool)), applicationController, SLOT(useMultiScreen(bool)));
+
     connect(mainWindow->actionWidePageSize, SIGNAL(triggered(bool)), boardController, SLOT(setWidePageSize(bool)));
     connect(mainWindow->actionWidePageSize_16_10, SIGNAL(triggered(bool)), boardController, SLOT(setWidePageSize16_10(bool)));
     connect(mainWindow->actionRegularPageSize, SIGNAL(triggered(bool)), boardController, SLOT(setRegularPageSize(bool)));
+
+    connect(mainWindow->actionCheckUpdate, SIGNAL(triggered()), applicationController, SLOT(checkUpdateRequest()));
+    */
+
+    bool bUseMultiScreen = UBSettings::settings()->appUseMultiscreen->get().toBool();
+    mainWindow->actionMultiScreen->setChecked(bUseMultiScreen);
+    applicationController->initScreenLayout(bUseMultiScreen);
 
     connect(mainWindow->actionCut, SIGNAL(triggered()), applicationController, SLOT(actionCut()));
     connect(mainWindow->actionCopy, SIGNAL(triggered()), applicationController, SLOT(actionCopy()));
     connect(mainWindow->actionPaste, SIGNAL(triggered()), applicationController, SLOT(actionPaste()));
 
-    applicationController->initScreenLayout(bUseMultiScreen);
-    boardController->setupLayout();
+    boardController->setupLayout(); //Empty function!
 
     if (pFileToImport.length() > 0)
         UBApplication::applicationController->importFile(pFileToImport);
 
-#if defined(Q_WS_MAC)
-    static AEEventHandlerUPP ub_proc_ae_handlerUPP = AEEventHandlerUPP(ub_appleEventProcessor);
-    AEInstallEventHandler(kCoreEventClass, kAEReopenApplication, ub_proc_ae_handlerUPP, SRefCon(UBApplication::applicationController), true);
-#endif
+    #if defined(Q_WS_MAC)
+        static AEEventHandlerUPP ub_proc_ae_handlerUPP = AEEventHandlerUPP(ub_appleEventProcessor);
+        AEInstallEventHandler(kCoreEventClass, kAEReopenApplication, ub_proc_ae_handlerUPP, SRefCon(UBApplication::applicationController), true);
+    #endif
 
     if (UBSettings::settings()->appStartMode->get().toInt())
         applicationController->showDesktop();
@@ -389,8 +389,12 @@ int UBApplication::exec(const QString& pFileToImport)
 
     onScreenCountChanged(1);
     connect(desktop(), SIGNAL(screenCountChanged(int)), this, SLOT(onScreenCountChanged(int)));
+
+    boardController->setFinalPageSize(); //My temporary hack!
+
     return QApplication::exec();
 }
+
 
 void UBApplication::onScreenCountChanged(int newCount)
 {
@@ -406,13 +410,17 @@ void UBApplication::importUniboardFiles()
 }
 
 #ifdef Q_WS_MAC
-    void UBApplication::showMinimized()
-    {
-        mainWindow->hide();
-        bIsMinimized = true;
-    }
-
+void UBApplication::showMinimized()
+{
+    mainWindow->hide();
+    bIsMinimized = true;
+}
 #endif
+
+void UBApplication::setDisabled(bool disable)
+{
+    boardController->setDisabled(disable);
+}
 
 void UBApplication::startScript()
 {
@@ -444,11 +452,17 @@ void UBApplication::showDocument()
     startScript();
 }
 
+void UBApplication::showMessage(const QString& message, bool showSpinningWheel)
+{
+    if (applicationController)
+        applicationController->showMessage(message, showSpinningWheel);
+}
+
+
 int UBApplication::toolBarHeight()
 {
     return mainWindow->boardToolBar->rect().height();
 }
-
 
 void UBApplication::toolBarPositionChanged(QVariant topOrBottom)
 {
@@ -467,7 +481,6 @@ void UBApplication::toolBarPositionChanged(QVariant topOrBottom)
     webController->showTabAtTop(topOrBottom.toBool());
 
 }
-
 
 void UBApplication::toolBarDisplayTextChanged(QVariant display)
 {
@@ -506,19 +519,6 @@ void UBApplication::closing()
 }
 
 
-void UBApplication::showMessage(const QString& message, bool showSpinningWheel)
-{
-    if (applicationController)
-        applicationController->showMessage(message, showSpinningWheel);
-}
-
-
-void UBApplication::setDisabled(bool disable)
-{
-    boardController->setDisabled(disable);
-}
-
-
 void UBApplication::decorateActionMenu(QAction* action)
 {
     foreach(QWidget* menuWidget,  action->associatedWidgets())
@@ -530,51 +530,60 @@ void UBApplication::decorateActionMenu(QAction* action)
             tb->setObjectName("ubButtonMenu");
             tb->setPopupMode(QToolButton::InstantPopup);
             QMenu* menu = new QMenu(mainWindow);
+            menu->setStyleSheet("QMenu::item { background-color: #6495ed; }");
 
+            // Removing Page size submenu, Multiscreen, updates options
+            /*
             QActionGroup* pageSizeGroup = new QActionGroup(mainWindow);
             pageSizeGroup->addAction(mainWindow->actionWidePageSize);
             pageSizeGroup->addAction(mainWindow->actionWidePageSize_16_10);
             pageSizeGroup->addAction(mainWindow->actionRegularPageSize);
             pageSizeGroup->addAction(mainWindow->actionCustomPageSize);
 
+            //Adding submenu "Page size" and setting its font
             QMenu* documentSizeMenu = menu->addMenu(QIcon(":/images/toolbar/pageSize.png"),tr("Page Size"));
+            QFont f = documentSizeMenu->menuAction()->font();
+            f.setPointSize(12);
+            documentSizeMenu->menuAction()->setFont(f);
+
             documentSizeMenu->addAction(mainWindow->actionWidePageSize);
             documentSizeMenu->addAction(mainWindow->actionWidePageSize_16_10);
             documentSizeMenu->addAction(mainWindow->actionRegularPageSize);
             documentSizeMenu->addAction(mainWindow->actionCustomPageSize);
-            menu->addAction(mainWindow->actionCut);
-            menu->addAction(mainWindow->actionCopy);
-            menu->addAction(mainWindow->actionPaste);
-            menu->addAction(mainWindow->actionHideApplication);
-            menu->addAction(mainWindow->actionSleep);
 
-            menu->addSeparator();
-            menu->addAction(mainWindow->actionPreferences);
+
             menu->addAction(mainWindow->actionMultiScreen);
+
             // SANKORE-48: Hide the check update action if the setting
             // EnableAutomaticSoftwareUpdates is false in Uniboard.config
             if(UBSettings::settings()->appEnableAutomaticSoftwareUpdates->get().toBool())
                 menu->addAction(mainWindow->actionCheckUpdate);
             else
                 mainWindow->actionCheckUpdate->setEnabled(false);
+            */
+
+            menu->addAction(mainWindow->actionCut);
+            menu->addAction(mainWindow->actionCopy);
+            menu->addAction(mainWindow->actionPaste);
 
             menu->addSeparator();
+
+            menu->addAction(mainWindow->actionHideApplication);
+            menu->addAction(mainWindow->actionSleep);
+            menu->addAction(mainWindow->actionPreferences);
             menu->addAction(mainWindow->actionTutorial);
-            //menu->addAction(mainWindow->actionSankoreEditor); // ALTI/AOU - 20140217 : don't show "Open-Sankoré Editor" anymore.
-
-#ifndef Q_WS_X11 // No Podcast on Linux yet
-            menu->addAction(mainWindow->actionPodcast);
-            mainWindow->actionPodcast->setText(tr("Podcast"));
-#endif
-
-            menu->addSeparator();
             menu->addAction(mainWindow->actionQuit);
+
+            #ifndef Q_WS_X11 // No Podcast on Linux yet!! :(
+                menu->addAction(mainWindow->actionPodcast);
+                mainWindow->actionPodcast->setText(tr("Podcast"));
+            #endif
+
 
             tb->setMenu(menu);
         }
     }
 }
-
 
 void UBApplication::updateProtoActionsState()
 {
@@ -587,7 +596,6 @@ void UBApplication::updateProtoActionsState()
         protoMenu->setVisible(true);
 
 }
-
 
 void UBApplication::insertSpaceToToolbarBeforeAction(QToolBar* toolbar, QAction* action, int width)
 {
@@ -635,15 +643,15 @@ bool UBApplication::eventFilter(QObject *obj, QEvent *event)
             boardController->controlView()->setMultiselection(false);
     }
 
-#ifdef Q_WS_MAC
-    if (bIsMinimized && event->type() == QEvent::ApplicationActivate){
-        if (mainWindow->isHidden()) mainWindow->show();
-        bIsMinimized = false;
-    }
-#endif
+    #ifdef Q_WS_MAC
+        if (bIsMinimized && event->type() == QEvent::ApplicationActivate){
+            if (mainWindow->isHidden()) mainWindow->show();
+            bIsMinimized = false;
+        }
+    #endif
+
     return result;
 }
-
 
 bool UBApplication::handleOpenMessage(const QString& pMessage)
 {
@@ -660,22 +668,6 @@ bool UBApplication::handleOpenMessage(const QString& pMessage)
     UBApplication::applicationController->importFile(pMessage);
 
     return true;
-}
-
-void UBApplication::cleanup()
-{
-    if (applicationController) delete applicationController;
-    if (boardController) delete boardController;
-    if (webController) delete webController;
-    if (documentController) delete documentController;
-    if (mUniboardSankoreTransition) delete mUniboardSankoreTransition;
-
-
-    applicationController = NULL;
-    boardController = NULL;
-    webController = NULL;
-    documentController = NULL;
-    mUniboardSankoreTransition = NULL;
 }
 
 void UBStyle::drawItemText(QPainter *painter, const QRect &rect, int alignment, const QPalette &pal,
@@ -710,6 +702,7 @@ void UBStyle::drawItemText(QPainter *painter, const QRect &rect, int alignment, 
     if (textRole != QPalette::NoRole)
         painter->setPen(savedPen);
 }
+
 
 QString UBApplication::urlFromHtml(QString html)
 {

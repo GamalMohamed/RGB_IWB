@@ -57,7 +57,7 @@ protected:
 
 class UBPreferencesController : public QObject
 {
-    Q_OBJECT;
+    Q_OBJECT
 
     public:
         UBPreferencesController(QWidget *parent);

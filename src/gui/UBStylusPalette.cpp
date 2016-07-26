@@ -18,9 +18,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Open-Sankoré.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
-
 #include "UBStylusPalette.h"
 
 #include <QtGui>
@@ -43,8 +40,7 @@ UBStylusPalette::UBStylusPalette(QWidget *parent, Qt::Orientation orient)
 {
     QList<QAction*> actions;
 
-    actions << UBApplication::mainWindow->actionDrawing; // Issue 1684 (EV-7) - ALTI/AOU - 20140203 : add to the Stylus Palette a button to open the Drawing Palette.
-
+    actions << UBApplication::mainWindow->actionDrawing;
     actions << UBApplication::mainWindow->actionPen;
     actions << UBApplication::mainWindow->actionEraser;
     actions << UBApplication::mainWindow->actionMarker;
@@ -74,55 +70,72 @@ UBStylusPalette::UBStylusPalette(QWidget *parent, Qt::Orientation orient)
 
     if(!UBPlatformUtils::hasVirtualKeyboard())
     {
-            groupActions();
+        groupActions();
     }
     else
     {
-            // VirtualKeyboard and Drawing actions are not in group
-            // So, groupping all buttons, except first and last
-            mButtonGroup = new QButtonGroup(this);
-            for(int i=1; i < mButtons.size()-1; i++)
-            {
-                    mButtonGroup->addButton(mButtons[i], i);
-            }
+        // VirtualKeyboard and Drawing actions are not in group
+        // So, groupping all buttons, except first and last
+        mButtonGroup = new QButtonGroup(this);
+        for(int i=1; i < mButtons.size()-1; i++)
+        {
+            mButtonGroup->addButton(mButtons[i], i);
+        }
         connect(mButtonGroup, SIGNAL(buttonClicked(int)), this, SIGNAL(buttonGroupClicked(int)));
     }
 
     adjustSizeAndPosition();
-
     initPosition();
+    setBackgroundColor();
 
     foreach(const UBActionPaletteButton* button, mButtons)
     {
         connect(button, SIGNAL(doubleClicked()), this, SLOT(stylusToolDoubleClicked()));
     }
+}
+
+
+UBStylusPalette::~UBStylusPalette()
+{
 
 }
 
 void UBStylusPalette::initPosition()
 {
-    if(!UBSettings::settings()->appToolBarOrientationVertical->get().toBool())
-    {
-        QWidget* pParentW = parentWidget();
-        if(NULL != pParentW)
-        {
-            mCustomPosition = true;
-            QPoint pos;
-            int parentWidth = pParentW->width();
-            int parentHeight = pParentW->height();
-            int posX = (parentWidth / 2) - (width() / 2);
-            int posY = parentHeight - border() - height();
+    QWidget* pParentW = parentWidget();
 
-            pos.setX(posX);
-            pos.setY(posY);
-            moveInsideParent(pos);
+    if(NULL != pParentW)
+    {
+        QPoint pos;
+        int parentWidth = pParentW->width();
+        int parentHeight = pParentW->height();
+        int posX,posY;
+        mCustomPosition = true;
+
+        if(!UBSettings::settings()->appToolBarOrientationVertical->get().toBool())
+        {
+                posX = (parentWidth / 2) - (width() / 2);
+                posY=0;
+                //int posY = parentHeight - border() - (parentHeight-height());
         }
+        else
+        {
+                posX = parentWidth;
+                posY = (parentHeight / 2) - (height() / 2);
+        }
+
+        pos.setX(posX);
+        pos.setY(posY);
+        moveInsideParent(pos);
     }
 }
 
-UBStylusPalette::~UBStylusPalette()
+void UBStylusPalette::setBackgroundColor()
 {
-
+    QBrush *brush = new QBrush();
+    brush->setStyle(Qt::SolidPattern);
+    brush->setColor(QColor(85, 170, 255));
+    setBackgroundBrush(*brush);
 }
 
 void UBStylusPalette::stylusToolDoubleClicked()

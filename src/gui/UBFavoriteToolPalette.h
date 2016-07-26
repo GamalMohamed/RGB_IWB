@@ -30,7 +30,7 @@
 
 class UBFavoriteToolPalette : public UBActionPalette
 {
-    Q_OBJECT;
+    Q_OBJECT
 
     public:
         UBFavoriteToolPalette(QWidget* parent = 0);
