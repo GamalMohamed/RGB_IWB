@@ -41,26 +41,25 @@ UBStylusPalette::UBStylusPalette(QWidget *parent, Qt::Orientation orient)
     QList<QAction*> actions;
 
     actions << UBApplication::mainWindow->actionDrawing;
+    actions << UBApplication::mainWindow->actionSelector;
+
     actions << UBApplication::mainWindow->actionPen;
     actions << UBApplication::mainWindow->actionEraser;
     actions << UBApplication::mainWindow->actionMarker;
-    actions << UBApplication::mainWindow->actionSelector;
-    actions << UBApplication::mainWindow->actionPlay;
+    actions << UBApplication::mainWindow->actionLine; // ALTI/AOU - 20140606 : restore Line tool
 
+    actions << UBApplication::mainWindow->actionPlay;
     actions << UBApplication::mainWindow->actionHand;
     actions << UBApplication::mainWindow->actionZoomIn;
     actions << UBApplication::mainWindow->actionZoomOut;
-
     actions << UBApplication::mainWindow->actionPointer;
-    actions << UBApplication::mainWindow->actionLine; // ALTI/AOU - 20140606 : restore Line tool
     actions << UBApplication::mainWindow->actionText;
+    actions << UBApplication::mainWindow->actionCapture;
 
     /* ALTI/AOU - 20140606 : RichTextEditor tool isn't available anymore.
     UBApplication::mainWindow->actionRichTextEditor->setEnabled(UBFeaturesController::RTEIsLoaded());
     actions << UBApplication::mainWindow->actionRichTextEditor;
     */
-
-    actions << UBApplication::mainWindow->actionCapture;
 
     if(UBPlatformUtils::hasVirtualKeyboard())
         actions << UBApplication::mainWindow->actionVirtualKeyboard;

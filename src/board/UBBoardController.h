@@ -7,6 +7,7 @@
 #include "document/UBDocumentContainer.h"
 #include "UBFeaturesController.h"
 #include "gui/UBActionPalette.h"
+#include "gui/UBToolbarButtonGroup.h"
 #include "domain/UBShapeFactory.h"
 
 
@@ -175,8 +176,7 @@ class UBBoardController : public UBDocumentContainer
         void setDocumentNavigator(UBDocumentNavigator *navigator){mDocumentNavigator = navigator;}
         UBDocumentNavigator *documentNavigator() const {return mDocumentNavigator;}
 
-
-    public slots:
+public slots:
         void ClearUndoStack();
 
         void showDocumentsDialog();
@@ -249,6 +249,9 @@ class UBBoardController : public UBDocumentContainer
         void startScript();
         void stopScript();
 
+        void ShowStylusDrawingOptions();
+        void HideStylusDrawingOptions();
+
     signals:
         void newPageAdded();
         void activeSceneChanged();
@@ -310,6 +313,7 @@ class UBBoardController : public UBDocumentContainer
         int mMovingSceneIndex;
         QString mActionGroupText;
         QString mActionUngroupText;
+
 
         UBShapeFactory mShapeFactory;        
 

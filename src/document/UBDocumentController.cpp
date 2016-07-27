@@ -2132,7 +2132,7 @@ QWidget* UBDocumentController::controlView()
 
 void UBDocumentController::setupToolbar()
 {
-    UBApplication::app()->insertSpaceToToolbarBeforeAction(mMainWindow->documentToolBar, mMainWindow->actionBoard);
+    //Removed!--UBApplication::app()->insertSpaceToToolbarBeforeAction(mMainWindow->documentToolBar, mMainWindow->actionBoard);
     connect(mMainWindow->actionDocumentTools, SIGNAL(triggered()), this, SLOT(toggleDocumentToolsPalette()));
 }
 

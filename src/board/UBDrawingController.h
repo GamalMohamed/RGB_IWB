@@ -85,6 +85,9 @@ class UBDrawingController : public QObject
         void lineWidthIndexChanged(int index);
         void colorIndexChanged(int index);
 
+        void StylusSelected();
+        void StylusUnSelected();
+
     private:
         UBStylusTool::Enum mStylusTool;
         UBStylusTool::Enum mLatestDrawingTool;

@@ -1,26 +1,3 @@
-/*
- * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
- *
- * This file is part of Open-Sankoré.
- *
- * Open-Sankoré is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License,
- * with a specific linking exception for the OpenSSL project's
- * "OpenSSL" library (or with modified versions of it that use the
- * same license as the "OpenSSL" library).
- *
- * Open-Sankoré is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Open-Sankoré.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-
-
 #include "UBDrawingController.h"
 
 #include "core/UBSettings.h"
@@ -61,32 +38,43 @@ UBDrawingController::UBDrawingController(QObject * parent)
     , mLatestDrawingTool((UBStylusTool::Enum)-1)
 	, mIsDesktopMode(false)
 {
-    connect(UBSettings::settings(), SIGNAL(colorContextChanged()), this, SIGNAL(colorPaletteChanged()));
+    connect(UBSettings::settings(), SIGNAL(colorContextChanged()),
+            this, SIGNAL(colorPaletteChanged()));
+    connect(UBApplication::mainWindow->actionPen, SIGNAL(triggered(bool)),
+            this, SLOT(penToolSelected(bool)));
+    connect(UBApplication::mainWindow->actionEraser, SIGNAL(triggered(bool)),
+            this, SLOT(eraserToolSelected(bool)));
+    connect(UBApplication::mainWindow->actionMarker, SIGNAL(triggered(bool)),
+            this, SLOT(markerToolSelected(bool)));
+    connect(UBApplication::mainWindow->actionSelector, SIGNAL(triggered(bool)),
+            this, SLOT(selectorToolSelected(bool)));
+    connect(UBApplication::mainWindow->actionPlay, SIGNAL(triggered(bool)),
+            this, SLOT(playToolSelected(bool)));
+    connect(UBApplication::mainWindow->actionHand, SIGNAL(triggered(bool)),
+            this, SLOT(handToolSelected(bool)));
+    connect(UBApplication::mainWindow->actionZoomIn, SIGNAL(triggered(bool)),
+            this, SLOT(zoomInToolSelected(bool)));
+    connect(UBApplication::mainWindow->actionZoomOut, SIGNAL(triggered(bool)),
+            this, SLOT(zoomOutToolSelected(bool)));
+    connect(UBApplication::mainWindow->actionPointer, SIGNAL(triggered(bool)),
+            this, SLOT(pointerToolSelected(bool)));
+    connect(UBApplication::mainWindow->actionLine, SIGNAL(triggered(bool)),
+            this, SLOT(lineToolSelected(bool)));
+    connect(UBApplication::mainWindow->actionText, SIGNAL(triggered(bool)),
+            this, SLOT(textToolSelected(bool)));
+    connect(UBApplication::mainWindow->actionCapture, SIGNAL(triggered(bool)),
+            this, SLOT(captureToolSelected(bool)));
+    connect(UBApplication::boardController, SIGNAL(activeSceneChanged()),
+            this, SLOT(onActiveSceneChanged())); //EV-7 - NNE - 20140210 : Maybe is no the right place to do this...
 
-    connect(UBApplication::mainWindow->actionPen, SIGNAL(triggered(bool)), this, SLOT(penToolSelected(bool)));
-    connect(UBApplication::mainWindow->actionEraser, SIGNAL(triggered(bool)), this, SLOT(eraserToolSelected(bool)));
-    connect(UBApplication::mainWindow->actionMarker, SIGNAL(triggered(bool)), this, SLOT(markerToolSelected(bool)));
-    connect(UBApplication::mainWindow->actionSelector, SIGNAL(triggered(bool)), this, SLOT(selectorToolSelected(bool)));
-    connect(UBApplication::mainWindow->actionPlay, SIGNAL(triggered(bool)), this, SLOT(playToolSelected(bool)));
-    connect(UBApplication::mainWindow->actionHand, SIGNAL(triggered(bool)), this, SLOT(handToolSelected(bool)));
-    connect(UBApplication::mainWindow->actionZoomIn, SIGNAL(triggered(bool)), this, SLOT(zoomInToolSelected(bool)));
-    connect(UBApplication::mainWindow->actionZoomOut, SIGNAL(triggered(bool)), this, SLOT(zoomOutToolSelected(bool)));
-    connect(UBApplication::mainWindow->actionPointer, SIGNAL(triggered(bool)), this, SLOT(pointerToolSelected(bool)));
-    connect(UBApplication::mainWindow->actionLine, SIGNAL(triggered(bool)), this, SLOT(lineToolSelected(bool)));
-    connect(UBApplication::mainWindow->actionText, SIGNAL(triggered(bool)), this, SLOT(textToolSelected(bool)));
-    //connect(UBApplication::mainWindow->actionRichTextEditor, SIGNAL(triggered(bool)), this, SLOT(richTextToolSelected(bool))); ALTI/AOU - 20140606 : RichTextEditor tool isn't available anymore.
-    connect(UBApplication::mainWindow->actionCapture, SIGNAL(triggered(bool)), this, SLOT(captureToolSelected(bool)));
 
-    //EV-7 - NNE - 20140210 : Maybe is no the right place to do this...
-    connect(UBApplication::boardController, SIGNAL(activeSceneChanged()), this, SLOT(onActiveSceneChanged()));
+    //Removed--connect(UBApplication::mainWindow->actionRichTextEditor, SIGNAL(triggered(bool)), this, SLOT(richTextToolSelected(bool))); ALTI/AOU - 20140606 : RichTextEditor tool isn't available anymore.
 }
-
 
 UBDrawingController::~UBDrawingController()
 {
     // NOOP
 }
-
 
 int UBDrawingController::stylusTool()
 {
@@ -99,12 +87,10 @@ int UBDrawingController::latestDrawingTool()
     return mLatestDrawingTool;
 }
 
-
 void UBDrawingController::setStylusTool(int tool)
 {
     if (tool != mStylusTool)
     {
-        //Ev-7 - NNE - 20140106
         if(tool != UBStylusTool::Drawing)
         {
             UBApplication::boardController->activeScene()->deselectAllItems();
@@ -179,9 +165,7 @@ void UBDrawingController::setStylusTool(int tool)
 
     //EV-7 : ce n'est pas de la responsabilité de cette méthode de le faire ... mais plus beaucoup de temps..
     deactivateCreationModeForGraphicsPathItems();
-
 }
-
 
 void UBDrawingController::onActiveSceneChanged()
 {
@@ -241,7 +225,6 @@ int UBDrawingController::currentToolWidthIndex()
     }
 }
 
-
 qreal UBDrawingController::currentToolWidth()
 {
     if (stylusTool() == UBStylusTool::Pen || stylusTool() == UBStylusTool::Line)
@@ -258,7 +241,6 @@ qreal UBDrawingController::currentToolWidth()
         return UBSettings::settings()->currentPenWidth();
     }
 }
-
 
 void UBDrawingController::setLineWidthIndex(int index)
 {
@@ -280,7 +262,6 @@ void UBDrawingController::setLineWidthIndex(int index)
     emit lineWidthIndexChanged(index);
 }
 
-
 int UBDrawingController::currentToolColorIndex()
 {
     if (stylusTool() == UBStylusTool::Pen || stylusTool() == UBStylusTool::Line)
@@ -296,7 +277,6 @@ int UBDrawingController::currentToolColorIndex()
         return -1;
     }
 }
-
 
 QColor UBDrawingController::currentToolColor()
 {
@@ -328,7 +308,6 @@ QColor UBDrawingController::toolColor(bool onDarkBackground)
     }
 }
 
-
 void UBDrawingController::setColorIndex(int index)
 {
     Q_ASSERT(index >= 0 && index < UBSettings::settings()->colorPaletteSize);
@@ -344,7 +323,6 @@ void UBDrawingController::setColorIndex(int index)
 
     emit colorIndexChanged(index);
 }
-
 
 void UBDrawingController::setEraserWidthIndex(int index)
 {
@@ -366,7 +344,6 @@ void UBDrawingController::setPenColor(bool onDarkBackground, const QColor& color
     emit colorPaletteChanged();
 }
 
-
 void UBDrawingController::setMarkerColor(bool onDarkBackground, const QColor& color, int pIndex)
 {
     if (onDarkBackground)
@@ -380,7 +357,6 @@ void UBDrawingController::setMarkerColor(bool onDarkBackground, const QColor& co
 
     emit colorPaletteChanged();
 }
-
 
 void UBDrawingController::setMarkerAlpha(qreal alpha)
 {
@@ -401,85 +377,114 @@ void UBDrawingController::penToolSelected(bool checked)
     if (checked)
     {
         setStylusTool(UBStylusTool::Pen);
-
+        emit StylusSelected();
     }
 }
 
 void UBDrawingController::eraserToolSelected(bool checked)
 {
     if (checked)
+    {
         setStylusTool(UBStylusTool::Eraser);
+        emit StylusSelected();
+    }
 }
 
 void UBDrawingController::markerToolSelected(bool checked)
 {
     if (checked)
+    {
         setStylusTool(UBStylusTool::Marker);
+        emit StylusSelected();
+    }
 }
 
-void UBDrawingController::selectorToolSelected(bool checked)
+void UBDrawingController::lineToolSelected(bool checked)
 {
     if (checked)
-        setStylusTool(UBStylusTool::Selector);
+    {
+        setStylusTool(UBStylusTool::Line);
+        emit StylusSelected();
+    }
 }
+
 
 void UBDrawingController::playToolSelected(bool checked)
 {
+    //Interact with objects
     if (checked)
+    {
         setStylusTool(UBStylusTool::Play);
+        emit StylusUnSelected();
+    }
+}
+
+void UBDrawingController::textToolSelected(bool checked)
+{
+    if (checked)
+    {
+        setStylusTool(UBStylusTool::Text);
+        emit StylusUnSelected();
+    }
 }
 
 void UBDrawingController::handToolSelected(bool checked)
 {
     if (checked)
+    {
         setStylusTool(UBStylusTool::Hand);
+        emit StylusUnSelected();
+    }
 }
-
-
-void UBDrawingController::zoomInToolSelected(bool checked)
-{
-    if (checked)
-        setStylusTool(UBStylusTool::ZoomIn);
-}
-
-
-void UBDrawingController::zoomOutToolSelected(bool checked)
-{
-    if (checked)
-        setStylusTool(UBStylusTool::ZoomOut);
-}
-
 
 void UBDrawingController::pointerToolSelected(bool checked)
 {
     if (checked)
+    {
         setStylusTool(UBStylusTool::Pointer);
+        emit StylusUnSelected();
+    }
 }
 
-
-void UBDrawingController::lineToolSelected(bool checked)
+void UBDrawingController::zoomInToolSelected(bool checked)
 {
     if (checked)
-        setStylusTool(UBStylusTool::Line);
+    {
+        setStylusTool(UBStylusTool::ZoomIn);
+        emit StylusUnSelected();
+    }
 }
 
-
-void UBDrawingController::textToolSelected(bool checked)
+void UBDrawingController::zoomOutToolSelected(bool checked)
 {
     if (checked)
-        setStylusTool(UBStylusTool::Text);
+    {
+        setStylusTool(UBStylusTool::ZoomOut);
+        emit StylusUnSelected();
+    }
 }
 
+void UBDrawingController::selectorToolSelected(bool checked)
+{
+    if (checked)
+    {
+        setStylusTool(UBStylusTool::Selector);
+        emit StylusUnSelected();
+    }
+}
+
+void UBDrawingController::captureToolSelected(bool checked)
+{
+    if (checked)
+    {
+        setStylusTool(UBStylusTool::Capture);
+        emit StylusUnSelected();
+    }
+}
+
+//Removed!
 void UBDrawingController::richTextToolSelected(bool checked)
 {
     if (checked)
         setStylusTool(UBStylusTool::RichText);
 }
-
-
-void UBDrawingController::captureToolSelected(bool checked)
-{
-    if (checked)
-        setStylusTool(UBStylusTool::Capture);
-}
-

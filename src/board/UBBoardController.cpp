@@ -44,7 +44,6 @@
 
 #include "gui/UBMessageWindow.h"
 #include "gui/UBResources.h"
-#include "gui/UBToolbarButtonGroup.h"
 #include "gui/UBMainWindow.h"
 #include "gui/UBToolWidget.h"
 #include "gui/UBKeyboardPalette.h"
@@ -94,6 +93,11 @@
 
 #include "web/UBWebController.h"
 
+static UBToolbarButtonGroup *eraserWidthChoice;
+static UBToolbarButtonGroup *lineWidthChoice;
+static UBToolbarButtonGroup *colorChoice;
+static bool toolsettings;
+
 UBBoardController::UBBoardController(UBMainWindow* mainWindow)
     : UBDocumentContainer(mainWindow->centralWidget())
     , mMainWindow(mainWindow)
@@ -131,6 +135,7 @@ UBBoardController::UBBoardController(UBMainWindow* mainWindow)
     int sPixelsPerMillimeter = qRound(dpiCommon / UBGeometryUtils::inchSize);
     UBSettings::settings()->crossSize = 10*sPixelsPerMillimeter;
 
+    toolsettings=false;
 }
 
 
@@ -140,35 +145,39 @@ void UBBoardController::init()
     setupViews();
     setupToolbar();
 
+    connect(UBDrawingController::drawingController(), SIGNAL(StylusSelected()),
+            this, SLOT(ShowStylusDrawingOptions()));
+    connect(UBDrawingController::drawingController(), SIGNAL(StylusUnSelected()),
+            this, SLOT(HideStylusDrawingOptions()));
+
     connect(UBApplication::undoStack, SIGNAL(canUndoChanged(bool))
             , this, SLOT(undoRedoStateChange(bool)));
-
     connect(UBApplication::undoStack, SIGNAL(canRedoChanged (bool))
             , this, SLOT(undoRedoStateChange(bool)));
-
     connect(UBDrawingController::drawingController(), SIGNAL(stylusToolChanged(int))
             , this, SLOT(setToolCursor(int)));
-
     connect(UBDrawingController::drawingController(), SIGNAL(stylusToolChanged(int))
             , this, SLOT(stylusToolChanged(int)));
-
     connect(UBApplication::app(), SIGNAL(lastWindowClosed())
             , this, SLOT(lastWindowClosed()));
 
-    connect(UBDownloadManager::downloadManager(), SIGNAL(downloadModalFinished()), this, SLOT(onDownloadModalFinished()));
-    connect(UBDownloadManager::downloadManager(), SIGNAL(addDownloadedFileToBoard(bool,QUrl,QUrl,QString,QByteArray,QPointF,QSize,bool,bool)), this, SLOT(downloadFinished(bool,QUrl,QUrl,QString,QByteArray,QPointF,QSize,bool,bool)));
+    connect(UBDownloadManager::downloadManager(), SIGNAL(downloadModalFinished()),
+            this, SLOT(onDownloadModalFinished()));
+    connect(UBDownloadManager::downloadManager(), SIGNAL(addDownloadedFileToBoard(bool,QUrl,QUrl,QString,QByteArray,QPointF,QSize,bool,bool)),
+            this, SLOT(downloadFinished(bool,QUrl,QUrl,QString,QByteArray,QPointF,QSize,bool,bool)));
 
     UBDocumentProxy* doc = UBPersistenceManager::persistenceManager()->createNewDocument();
 
     setActiveDocumentScene(doc);
 
-    connect(UBApplication::mainWindow->actionGroupItems, SIGNAL(triggered()), this, SLOT(groupButtonClicked()));
+    connect(UBApplication::mainWindow->actionGroupItems, SIGNAL(triggered()),
+            this, SLOT(groupButtonClicked()));
+
 
     undoRedoStateChange(true);
 
     mShapeFactory.init();
 }
-
 
 UBBoardController::~UBBoardController()
 {
@@ -182,6 +191,7 @@ int UBBoardController::currentPage()
         return mActiveSceneIndex;
     return mActiveSceneIndex + 1;
 }
+
 
 void UBBoardController::setupViews()
 {
@@ -200,7 +210,8 @@ void UBBoardController::setupViews()
     mControlContainer->setObjectName("ubBoardControlContainer");
     mMainWindow->addBoardWidget(mControlContainer);
 
-    connect(mControlView, SIGNAL(resized(QResizeEvent*)), this, SLOT(boardViewResized(QResizeEvent*)));
+    connect(mControlView, SIGNAL(resized(QResizeEvent*)),
+            this, SLOT(boardViewResized(QResizeEvent*)));
 
     // TODO UB 4.x Optimization do we have to create the display view even if their is only 1 screen
 
@@ -232,7 +243,6 @@ void UBBoardController::setupLayout()
     if(mPaletteManager)
         mPaletteManager->setupLayout();
 }
-
 
 void UBBoardController::setBoxing(QRect displayRect)
 {
@@ -269,18 +279,15 @@ void UBBoardController::setBoxing(QRect displayRect)
     }
 }
 
-
 QSize UBBoardController::displayViewport()
 {
     return mDisplayView->geometry().size();
 }
 
-
 QSize UBBoardController::controlViewport()
 {
     return mControlView->geometry().size();
 }
-
 
 QRectF UBBoardController::controlGeometry()
 {
@@ -290,82 +297,16 @@ QRectF UBBoardController::controlGeometry()
 
 void UBBoardController::setupToolbar()
 {
-    /*
-    UBSettings *settings = UBSettings::settings();
-
-    // Setup color choice widget
-    QList<QAction *> colorActions;
-    colorActions.append(mMainWindow->actionColor0);
-    colorActions.append(mMainWindow->actionColor1);
-    colorActions.append(mMainWindow->actionColor2);
-    colorActions.append(mMainWindow->actionColor3);
-
-    UBToolbarButtonGroup *colorChoice =
-            new UBToolbarButtonGroup(mMainWindow->boardToolBar, colorActions);
-
-    mMainWindow->boardToolBar->insertWidget(mMainWindow->actionBackgrounds, colorChoice);
-
-    connect(settings->appToolBarDisplayText, SIGNAL(changed(QVariant)), colorChoice, SLOT(displayText(QVariant)));
-    connect(colorChoice, SIGNAL(activated(int)), this, SLOT(setColorIndex(int)));
-    connect(UBDrawingController::drawingController(), SIGNAL(colorIndexChanged(int)), colorChoice, SLOT(setCurrentIndex(int)));
-    connect(UBDrawingController::drawingController(), SIGNAL(colorPaletteChanged()), colorChoice, SLOT(colorPaletteChanged()));
-    connect(UBDrawingController::drawingController(), SIGNAL(colorPaletteChanged()), this, SLOT(colorPaletteChanged()));
-
-    colorChoice->displayText(QVariant(settings->appToolBarDisplayText->get().toBool()));
-    colorChoice->colorPaletteChanged();
-
-    // Setup line width choice widget
-    QList<QAction *> lineWidthActions;
-    lineWidthActions.append(mMainWindow->actionLineSmall);
-    lineWidthActions.append(mMainWindow->actionLineMedium);
-    lineWidthActions.append(mMainWindow->actionLineLarge);
-
-    UBToolbarButtonGroup *lineWidthChoice =
-            new UBToolbarButtonGroup(mMainWindow->boardToolBar, lineWidthActions);
-
-    connect(settings->appToolBarDisplayText, SIGNAL(changed(QVariant)), lineWidthChoice, SLOT(displayText(QVariant)));
-
-    connect(lineWidthChoice, SIGNAL(activated(int))
-            , UBDrawingController::drawingController(), SLOT(setLineWidthIndex(int)));
-
-    connect(UBDrawingController::drawingController(), SIGNAL(lineWidthIndexChanged(int))
-            , lineWidthChoice, SLOT(setCurrentIndex(int)));
-
-    lineWidthChoice->displayText(QVariant(settings->appToolBarDisplayText->get().toBool()));
-
-    mMainWindow->boardToolBar->insertWidget(mMainWindow->actionBackgrounds, lineWidthChoice);
-
-    //-----------------------------------------------------------//
-    // Setup eraser width choice widget
-
-    QList<QAction *> eraserWidthActions;
-    eraserWidthActions.append(mMainWindow->actionEraserSmall);
-    eraserWidthActions.append(mMainWindow->actionEraserMedium);
-    eraserWidthActions.append(mMainWindow->actionEraserLarge);
-
-    UBToolbarButtonGroup *eraserWidthChoice =
-            new UBToolbarButtonGroup(mMainWindow->boardToolBar, eraserWidthActions);
-
-    mMainWindow->boardToolBar->insertWidget(mMainWindow->actionBackgrounds, eraserWidthChoice);
-
-    connect(settings->appToolBarDisplayText, SIGNAL(changed(QVariant)), eraserWidthChoice, SLOT(displayText(QVariant)));
-    connect(eraserWidthChoice, SIGNAL(activated(int)), UBDrawingController::drawingController(), SLOT(setEraserWidthIndex(int)));
-
-    eraserWidthChoice->displayText(QVariant(settings->appToolBarDisplayText->get().toBool()));
-    eraserWidthChoice->setCurrentIndex(settings->eraserWidthIndex());
-
-    mMainWindow->boardToolBar->insertSeparator(mMainWindow->actionBackgrounds);
-
-    //-----------------------------------------------------------//
-
-    UBApplication::app()->insertSpaceToToolbarBeforeAction(mMainWindow->boardToolBar, mMainWindow->actionBoard);
-    UBApplication::app()->insertSpaceToToolbarBeforeAction(mMainWindow->tutorialToolBar, mMainWindow->actionBoard);
-    */
     UBApplication::app()->insertSpaceToToolbarBeforeAction(mMainWindow->boardToolBar, mMainWindow->actionUndo);
 
-    UBApplication::app()->decorateActionMenu(mMainWindow->actionMenu);
-
+    //mMainWindow->boardToolBar->insertSeparator(mMainWindow->actionBackgrounds);
+    /*Totally removed(Show board icon)
+    UBApplication::app()->insertSpaceToToolbarBeforeAction(mMainWindow->boardToolBar, mMainWindow->actionBoard);
+    UBApplication::app()->insertSpaceToToolbarBeforeAction(mMainWindow->tutorialToolBar, mMainWindow->actionBoard);
     //mMainWindow->actionBoard->setVisible(false);
+    */
+
+    UBApplication::app()->decorateActionMenu(mMainWindow->actionMenu);
 
     mMainWindow->webToolBar->hide();
     mMainWindow->documentToolBar->hide();
@@ -373,6 +314,102 @@ void UBBoardController::setupToolbar()
 
     connectToolbar();
     initToolbarTexts();
+}
+
+void UBBoardController::ShowStylusDrawingOptions()
+{
+   if(!toolsettings)
+   {
+       UBSettings *settings = UBSettings::settings();
+
+
+       /************ Setup color choice widget ************/
+       QList<QAction *> colorActions;
+       colorActions.append(mMainWindow->actionColor0);
+       colorActions.append(mMainWindow->actionColor1);
+       colorActions.append(mMainWindow->actionColor2);
+       colorActions.append(mMainWindow->actionColor3);
+
+       colorChoice = new UBToolbarButtonGroup(mMainWindow->boardToolBar, colorActions);
+
+       connect(settings->appToolBarDisplayText, SIGNAL(changed(QVariant)),
+               colorChoice, SLOT(displayText(QVariant)));
+       connect(UBDrawingController::drawingController(),
+               SIGNAL(colorIndexChanged(int)), colorChoice, SLOT(setCurrentIndex(int)));
+       connect(UBDrawingController::drawingController(),
+               SIGNAL(colorPaletteChanged()), colorChoice, SLOT(colorPaletteChanged()));
+       connect(UBDrawingController::drawingController(),
+               SIGNAL(colorPaletteChanged()), this, SLOT(colorPaletteChanged()));
+       connect(colorChoice, SIGNAL(activated(int)), this, SLOT(setColorIndex(int)));
+
+       colorChoice->displayText(QVariant(settings->appToolBarDisplayText->get().toBool()));
+       colorChoice->colorPaletteChanged();
+
+       mMainWindow->boardToolBar->insertWidget(mMainWindow->actionBackgrounds, colorChoice);
+
+
+       /************ Setup line width choice widget ************/
+       QList<QAction *> lineWidthActions;
+       lineWidthActions.append(mMainWindow->actionLineSmall);
+       lineWidthActions.append(mMainWindow->actionLineMedium);
+       lineWidthActions.append(mMainWindow->actionLineLarge);
+
+       lineWidthChoice = new UBToolbarButtonGroup(mMainWindow->boardToolBar, lineWidthActions);
+
+       connect(settings->appToolBarDisplayText, SIGNAL(changed(QVariant)),
+               lineWidthChoice, SLOT(displayText(QVariant)));
+       connect(colorChoice, SIGNAL(activated(int)), this, SLOT(setColorIndex(int)));
+       connect(lineWidthChoice, SIGNAL(activated(int))
+               , UBDrawingController::drawingController(), SLOT(setLineWidthIndex(int)));
+       connect(UBDrawingController::drawingController(), SIGNAL(lineWidthIndexChanged(int))
+               , lineWidthChoice, SLOT(setCurrentIndex(int)));
+
+       lineWidthChoice->displayText(QVariant(settings->appToolBarDisplayText->get().toBool()));
+
+       mMainWindow->boardToolBar->insertWidget(mMainWindow->actionBackgrounds, lineWidthChoice);
+
+
+       /************ Setup eraser width choice widget ************/
+       QList<QAction *> eraserWidthActions;
+       eraserWidthActions.append(mMainWindow->actionEraserSmall);
+       eraserWidthActions.append(mMainWindow->actionEraserMedium);
+       eraserWidthActions.append(mMainWindow->actionEraserLarge);
+
+       eraserWidthChoice = new UBToolbarButtonGroup(mMainWindow->boardToolBar, eraserWidthActions);
+
+       connect(settings->appToolBarDisplayText, SIGNAL(changed(QVariant)),
+               eraserWidthChoice, SLOT(displayText(QVariant)));
+       connect(eraserWidthChoice, SIGNAL(activated(int)),
+               UBDrawingController::drawingController(), SLOT(setEraserWidthIndex(int)));
+
+       eraserWidthChoice->displayText(QVariant(settings->appToolBarDisplayText->get().toBool()));
+       eraserWidthChoice->setCurrentIndex(settings->eraserWidthIndex());
+
+       mMainWindow->boardToolBar->insertWidget(mMainWindow->actionBackgrounds, eraserWidthChoice);
+
+       toolsettings=true;
+
+   }
+}
+
+void UBBoardController::HideStylusDrawingOptions()
+{
+    if(eraserWidthChoice != NULL)
+    {
+        delete eraserWidthChoice;
+        eraserWidthChoice=NULL;
+    }
+    if(lineWidthChoice!= NULL)
+    {
+        delete lineWidthChoice;
+        lineWidthChoice=NULL;
+    }
+    if(colorChoice!= NULL)
+    {
+        delete colorChoice;
+        colorChoice=NULL;
+    }
+    toolsettings=false;
 }
 
 
@@ -385,7 +422,6 @@ void UBBoardController::setToolCursor(int tool)
 
     mControlView->setToolCursor(tool);
 }
-
 
 void UBBoardController::connectToolbar()
 {
@@ -444,7 +480,6 @@ void UBBoardController::initToolbarTexts()
     }
 }
 
-
 void UBBoardController::setToolbarTexts()
 {
     bool highResolution = mMainWindow->width() > 1024;
@@ -474,13 +509,11 @@ void UBBoardController::setToolbarTexts()
     }
 }
 
-
 QString UBBoardController::truncate(QString text, int maxWidth)
 {
     QFontMetricsF fontMetrics(mMainWindow->font());
     return fontMetrics.elidedText(text, Qt::ElideRight, maxWidth);
 }
-
 
 void UBBoardController::stylusToolDoubleClicked(int tool)
 {
@@ -494,6 +527,7 @@ void UBBoardController::stylusToolDoubleClicked(int tool)
         mActiveScene->setLastCenter(QPointF(0,0));// Issue 1598/1605 - CFA - 20131028
     }
 }
+
 
 void UBBoardController::addScene()
 {
@@ -555,7 +589,6 @@ void UBBoardController::addScene(UBGraphicsScene* scene, bool replaceActiveIfEmp
         selectedDocument()->setMetaData(UBSettings::documentUpdatedAt, UBStringUtils::toUtcIsoDateTime(QDateTime::currentDateTime()));
     }
 }
-
 
 void UBBoardController::addScene(UBDocumentProxy* proxy, int sceneIndex, bool replaceActiveIfEmpty)
 {
@@ -836,7 +869,6 @@ void UBBoardController::clearScene()
     }
 }
 
-
 void UBBoardController::clearSceneItems()
 {
     if (mActiveScene)
@@ -846,7 +878,6 @@ void UBBoardController::clearSceneItems()
         updateActionStates();
     }
 }
-
 
 void UBBoardController::clearSceneAnnotation()
 {
@@ -979,7 +1010,6 @@ void UBBoardController::zoomIn(QPointF scenePoint)
     zoom(mZoomFactor, scenePoint);
 }
 
-
 void UBBoardController::zoomOut(QPointF scenePoint)
 {
     if ((mControlView->horizontalScrollBar()->maximum() == 0) && (mControlView->verticalScrollBar()->maximum() == 0))
@@ -993,7 +1023,6 @@ void UBBoardController::zoomOut(QPointF scenePoint)
 
     zoom(newZoomFactor, scenePoint);
 }
-
 
 void UBBoardController::zoomRestore()
 {
@@ -1014,19 +1043,16 @@ void UBBoardController::zoomRestore()
     emit zoomChanged(1.0);
 }
 
-
 void UBBoardController::centerRestore()
 {
     centerOn(QPointF(0,0));
 }
-
 
 void UBBoardController::centerOn(QPointF scenePoint)
 {
     mControlView->centerOn(scenePoint);
     UBApplication::applicationController->adjustDisplayView();
 }
-
 
 void UBBoardController::zoom(const qreal ratio, QPointF scenePoint)
 {
@@ -2128,7 +2154,6 @@ UBGraphicsScene* UBBoardController::activeScene() const
     return mActiveScene;
 }
 
-
 int UBBoardController::activeSceneIndex() const
 {
     return mActiveSceneIndex;
@@ -2480,7 +2505,6 @@ void UBBoardController::updatePageSizeState()
     }
 }
 
-
 void UBBoardController::saveViewState()
 {
     if (mActiveScene)
@@ -2491,7 +2515,6 @@ void UBBoardController::saveViewState()
                                                                    mActiveScene->lastCenter()));
     }
 }
-
 
 void UBBoardController::updateBackgroundState()
 {
@@ -2507,6 +2530,7 @@ void UBBoardController::updateBackgroundState()
         newBackgroundStyle ="QWidget {background-color: #F1F1F1}";
     }
 }
+
 
 void UBBoardController::stylusToolChanged(int tool)
 {
@@ -2545,7 +2569,6 @@ void UBBoardController::stylusToolChanged(int tool)
 
     updateBackgroundState();
 }
-
 
 QUrl UBBoardController::expandWidgetToTempDir(const QByteArray& pZipedData, const QString& ext)
 {
@@ -2738,7 +2761,6 @@ void UBBoardController::copy()
 
     }
 }
-
 
 void UBBoardController::paste()
 {
