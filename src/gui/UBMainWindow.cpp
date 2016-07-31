@@ -259,3 +259,4 @@ void UBMainWindow::hideDownloadWidget()
         mpDownloadWidget->hide();
     }
 }
+

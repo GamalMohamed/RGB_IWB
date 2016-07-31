@@ -270,13 +270,8 @@ void UBApplication::setupTranslators(QStringList args)
     UBSettings::settings()->init();
 }
 
-
-//Application CORE function!
-int UBApplication::exec(const QString& pFileToImport)
+void UBApplication::setWebConfigs()
 {
-    QPixmapCache::setCacheLimit(1024 * 100);
-
-    /***********************Web configurations***********************/
     QString webDbPath = UBSettings::userDataDirectory() + "/web-databases";
     QDir webDbDir(webDbPath);
     if (!webDbDir.exists(webDbPath))
@@ -293,9 +288,10 @@ int UBApplication::exec(const QString& pFileToImport)
     gs->setAttribute(QWebSettings::OfflineStorageDatabaseEnabled, true);
     gs->setAttribute(QWebSettings::JavascriptCanAccessClipboard, true);
     gs->setAttribute(QWebSettings::DnsPrefetchEnabled, true);
+}
 
-
-    /***********************Window UI configurations=>mainWindow***********************/
+void UBApplication::setMainWindowUI()
+{
     mainWindow = new UBMainWindow(0, Qt::FramelessWindowHint); // deleted by application destructor
     mainWindow->setAttribute(Qt::WA_NativeWindow, true);
 
@@ -308,7 +304,16 @@ int UBApplication::exec(const QString& pFileToImport)
     connect(mainWindow->actionResources, SIGNAL(triggered()), this, SLOT(showDocument()));
     connect(mainWindow->actionQuit, SIGNAL(triggered()), this, SLOT(closing()));
     connect(mainWindow, SIGNAL(closeEvent_Signal(QCloseEvent*)), this, SLOT(closeEvent(QCloseEvent*)));
+}
 
+//Application CORE function!
+int UBApplication::exec(const QString& pFileToImport)
+{
+    QPixmapCache::setCacheLimit(1024 * 100);
+
+    setWebConfigs();
+
+    setMainWindowUI();
 
     /***********************Setting-up Controllers***********************/
     // Conrollers: Board, Web, document, AppController, Preferences
@@ -530,7 +535,7 @@ void UBApplication::decorateActionMenu(QAction* action)
             tb->setObjectName("ubButtonMenu");
             tb->setPopupMode(QToolButton::InstantPopup);
             QMenu* menu = new QMenu(mainWindow);
-            menu->setStyleSheet("QMenu::item { background-color: rgb(65,105,225); }");
+            menu->setStyleSheet("QMenu::item { background-color: rgb(180,0,225); }");
 
             // Removing Page size submenu, Multiscreen, updates options
             /*

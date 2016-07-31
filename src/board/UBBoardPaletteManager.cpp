@@ -1,26 +1,3 @@
-/*
- * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
- *
- * This file is part of Open-Sankoré.
- *
- * Open-Sankoré is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License,
- * with a specific linking exception for the OpenSSL project's
- * "OpenSSL" library (or with modified versions of it that use the
- * same license as the "OpenSSL" library).
- *
- * Open-Sankoré is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Open-Sankoré.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-
-
 #include "UBBoardPaletteManager.h"
 
 #include "frameworks/UBPlatformUtils.h"
@@ -71,6 +48,7 @@
 
 #include "core/memcheck.h"
 
+static bool hidden=false;
 UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardController* pBoardController)
     : QObject(container)
     , mKeyboardPalette(0)
@@ -102,6 +80,8 @@ UBBoardPaletteManager::UBBoardPaletteManager(QWidget* container, UBBoardControll
     , mDownloadInProgress(false)
 {
     mTeacherResources = NULL;
+    connect(UBApplication::mainWindow->actionToolbox, SIGNAL(triggered()), this, SLOT(RightPaletteTools()));
+
     setupPalettes();
     connectPalettes();
 }
@@ -128,16 +108,26 @@ void UBBoardPaletteManager::setupLayout()
 
 }
 
+
+void UBBoardPaletteManager::RightPaletteTools()
+{
+    mRightPalette->toggleCollapseExpand();
+    if(!hidden)
+    {
+        toggleStylusPalette(false);
+    }
+    else
+    {
+        toggleStylusPalette(true);
+    }
+    hidden=!hidden;
+}
+
 /**
  * \brief Set up the dock palette widgets
  */
 void UBBoardPaletteManager::setupDockPaletteWidgets()
 {
-
-    // Create the widgets for the dock palettes
-    mpCachePropWidget = new UBCachePropertiesWidget();
-    mpDownloadWidget = new UBDockDownloadWidget();
-
     // Add the dock palettes
     mLeftPalette = new UBLeftPalette(mContainer);
 
@@ -161,13 +151,17 @@ void UBBoardPaletteManager::setupDockPaletteWidgets()
     mLeftPalette->connectSignals();
 
 
+    // Create the widgets for the dock palettes
+    mpCachePropWidget = new UBCachePropertiesWidget();
+    mpDownloadWidget = new UBDockDownloadWidget();
+
+
     mRightPalette = new UBRightPalette(mContainer);
 
     // RIGHT palette widgets
     mpFeaturesWidget = new UBFeaturesWidget();
     mRightPalette->registerWidget(mpFeaturesWidget);
     mRightPalette->addTab(mpFeaturesWidget);
-
 
     // The cache widget will be visible only if a cache is put on the page
     mRightPalette->registerWidget(mpCachePropWidget);
@@ -181,6 +175,7 @@ void UBBoardPaletteManager::setupDockPaletteWidgets()
     // Hide the tabs that must be hidden
     mRightPalette->removeTab(mpDownloadWidget);
     mRightPalette->removeTab(mpCachePropWidget);
+    mRightPalette->Hide();
 
 }
 
@@ -271,7 +266,6 @@ void UBBoardPaletteManager::setupPalettes()
     mPagePalette->hide();
 
 
-    // Issue 1684 - CFA - 20131120
     QList<QAction*> imageBackgroundActions;
     imageBackgroundActions << UBApplication::mainWindow->actionCenterImageBackground;
     UBApplication::mainWindow->actionCenterImageBackground->setIcon(QIcon(":/images/imageBackgroundPalette/centerBackground.png"));

@@ -1,26 +1,3 @@
-/*
- * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
- *
- * This file is part of Open-Sankoré.
- *
- * Open-Sankoré is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License,
- * with a specific linking exception for the OpenSSL project's
- * "OpenSSL" library (or with modified versions of it that use the
- * same license as the "OpenSSL" library).
- *
- * Open-Sankoré is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Open-Sankoré.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-
-
 #include <QPoint>
 #include <QPointF>
 #include <QPainterPath>
@@ -83,16 +60,15 @@ UBDockPalette::UBDockPalette(eUBDockPaletteType paletteType, QWidget *parent, co
         setAttribute(Qt::WA_TranslucentBackground);
     }
 
-    mBackgroundBrush = QBrush(UBSettings::paletteColor);
+    mBackgroundBrush = QBrush(UBSettings::paletteColor); //change
 
     // Filling inside the side palettes
-    setStyleSheet("QWidget {background-color: rgb(180,0,255)}");
+    //setStyleSheet("QWidget {background-color: rgb(180,0,255)}"); //change
 
     // Set the position of the tab
     onToolbarPosUpdated();
     connect(UBSettings::settings()->appToolBarPositionedAtTop, SIGNAL(changed(QVariant)), this, SLOT(onToolbarPosUpdated()));
     connect(UBDownloadManager::downloadManager(), SIGNAL(allDownloadsFinished()), this, SLOT(onAllDownloadsFinished()));
-
     connect(UBApplication::boardController,SIGNAL(documentSet(UBDocumentProxy*)),this,SLOT(onDocumentSet(UBDocumentProxy*)));
 }
 
@@ -311,7 +287,8 @@ void UBDockPalette::showTabWidget(int tabIndex)
     mCurrentTab = tabIndex;
 
     // Update the current tab index
-    if(NULL != (dynamic_cast<UBDockPaletteWidget*>(mpStackWidget->widget(tabIndex)))){
+    if(NULL != (dynamic_cast<UBDockPaletteWidget*>(mpStackWidget->widget(tabIndex))))
+    {
         mCrntTabWidget = dynamic_cast<UBDockPaletteWidget*>(mpStackWidget->widget(tabIndex))->name();
     }
 
@@ -329,6 +306,13 @@ void UBDockPalette::toggleCollapseExpand()
         update();
         resize(0,height());
     }
+}
+
+void UBDockPalette::Hide()
+{
+    mLastWidth = width();
+    update();
+    resize(0,height());
 }
 
 /**
@@ -592,10 +576,12 @@ UBTabDockPalette::UBTabDockPalette(UBDockPalette *dockPalette, QWidget *parent) 
 , mVerticalOffset(0)
 , mFlotable(false)
 {
+    /*
     int numTabs = dock->mTabWidgets.size();
     resize(2 * dock->border(), (numTabs * TABSIZE) + qMax(numTabs - 1, 0) * dock->tabSpacing());
 
     setAttribute(Qt::WA_TranslucentBackground);
+    */
 }
 
 UBTabDockPalette::~UBTabDockPalette(){
@@ -604,6 +590,7 @@ UBTabDockPalette::~UBTabDockPalette(){
 
 void UBTabDockPalette::paintEvent(QPaintEvent *event)
 {
+
     int nTabs = dock->mTabWidgets.size();
     if (nTabs <= 0) {
         qDebug() << "not enough tabs";
@@ -615,9 +602,12 @@ void UBTabDockPalette::paintEvent(QPaintEvent *event)
     painter.setPen(Qt::NoPen);
     painter.setBrush(dock->mBackgroundBrush);
 
+
     int yFrom = 0;
-    for (int i = 0; i < nTabs; i++) {
+    for (int i = 0; i < nTabs; i++)
+    {
         UBDockPaletteWidget* pCrntWidget = dock->mTabWidgets.at(i);
+        dock->mTabWidgets.at(i)->setStyleSheet("background-color: rgb(180,0,255);");//change
         QPainterPath path;
         path.setFillRule(Qt::WindingFill);
         QPixmap iconPixmap;
@@ -665,21 +655,24 @@ void UBTabDockPalette::paintEvent(QPaintEvent *event)
 
         painter.save();
         QPixmap transparencyPix(":/images/tab_mask.png");
-        if (dock->mCurrentTab != i) {
+        if (dock->mCurrentTab != i)
+        {
             iconPixmap.setAlphaChannel(transparencyPix);
-            QColor color(0x7F, 0x7F, 0x7F, 0x3F);
+            QColor color(180, 0, 255, 255);//change
             painter.setBrush(QBrush(color));
         }
 
-        painter.drawPath(path);
-        painter.drawPixmap(2, yFrom + 2, width() - 4, TABSIZE - 4, iconPixmap);
+        //painter.drawPath(path);//changed
+        //painter.drawPixmap(2, yFrom + 2, width() - 4, TABSIZE - 4, iconPixmap);//changed
         yFrom += (TABSIZE + dock->tabSpacing());
         painter.restore();
     }
+
 }
 
 void UBTabDockPalette::mousePressEvent(QMouseEvent *event)
 {
+    /*
     dock->mClickTime = QTime::currentTime();
     // The goal here is to verify if the user can resize the widget.
     // It is only possible to resize it if the border is selected
@@ -687,7 +680,8 @@ void UBTabDockPalette::mousePressEvent(QMouseEvent *event)
     dock->mMousePressPos = p;
     dock->mResized = false;
 
-    switch(dock->mOrientation) {
+    switch(dock->mOrientation)
+    {
     case eUBDockOrientation_Left:
         dock->mCanResize = true;
         break;
@@ -703,9 +697,11 @@ void UBTabDockPalette::mousePressEvent(QMouseEvent *event)
     default:
         break;
     }
+    */
 }
 void UBTabDockPalette::mouseMoveEvent(QMouseEvent *event)
 {
+    /*
     QPoint p = event->pos();
 
     if(dock->mCanResize && ((dock->mMousePressPos - p).manhattanLength() > QApplication::startDragDistance()))
@@ -756,10 +752,11 @@ void UBTabDockPalette::mouseMoveEvent(QMouseEvent *event)
             break;
         }
     }
+    */
 }
-
 void UBTabDockPalette::mouseReleaseEvent(QMouseEvent *event)
 {
+    /*
     Q_UNUSED(event);
     if(!dock->mResized && dock->mClickTime.elapsed() < CLICKTIME) {
         int nbTabs = dock->mTabWidgets.size();
@@ -776,4 +773,5 @@ void UBTabDockPalette::mouseReleaseEvent(QMouseEvent *event)
         }
     }
     dock->mCanResize = false;
+    */
 }

@@ -113,7 +113,10 @@ class UBApplication : public QtSingleApplication
         QList<QMenu*> mProtoMenus;
         bool mIsVerbose;
         QString checkLanguageAvailabilityForSankore(QString& language);
-    protected:
+        void setMainWindowUI();
+        void setWebConfigs();
+
+protected:
 
 #if defined(Q_WS_MACX) && !defined(QT_MAC_USE_COCOA)
         bool macEventFilter(EventHandlerCallRef caller, EventRef event);

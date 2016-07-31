@@ -1,26 +1,3 @@
-/*
- * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
- *
- * This file is part of Open-Sankoré.
- *
- * Open-Sankoré is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License,
- * with a specific linking exception for the OpenSSL project's
- * "OpenSSL" library (or with modified versions of it that use the
- * same license as the "OpenSSL" library).
- *
- * Open-Sankoré is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Open-Sankoré.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-
-
 #include <QDomDocument>
 #include <QWebView>
 
@@ -66,6 +43,7 @@ UBFeaturesWidget::UBFeaturesWidget(QWidget *parent, const char *name)
     controller->assignPathListView(pathListView);
 
     centralWidget = new UBFeaturesCentralWidget(this);
+    centralWidget->setStyleSheet("background-color: rgb(180,0,255);"); //change
     controller->assignFeaturesListView(centralWidget->listView());
     centralWidget->setSliderPosition(UBSettings::settings()->featureSliderPosition->get().toInt());
 
@@ -77,39 +55,53 @@ UBFeaturesWidget::UBFeaturesWidget(QWidget *parent, const char *name)
     layout->addWidget(centralWidget);
     layout->addWidget(mActionBar);
 
-    //issue 1474 - NNE - 20131119
-    connect(centralWidget->listView(), SIGNAL(restoreFeature(QVector<UBFeature>)), controller, SLOT(restoreFeature(QVector<UBFeature>)));
 
-    connect(centralWidget->listView(), SIGNAL(clicked(QModelIndex)), this, SLOT(currentSelected(QModelIndex)));
-    connect(centralWidget->listView()->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection))
-            , this, SLOT(processViewSelectionChanged(QItemSelection,QItemSelection)));
-    connect(this, SIGNAL(sendFileNameList(QStringList)), centralWidget, SIGNAL(sendFileNameList(QStringList)));
+    connect(centralWidget->listView(), SIGNAL(restoreFeature(QVector<UBFeature>)), controller, SLOT(restoreFeature(QVector<UBFeature>)));
     connect(this, SIGNAL(allowNewFolderButton(bool)), mActionBar, SLOT(allowNewFolderBtn(bool)));
     connect(this, SIGNAL(allowDeleteButton(bool)), mActionBar, SLOT(allowDeleteButton(bool)));
-    connect(mActionBar, SIGNAL(searchElement(const QString &)), this, SLOT( searchStarted(const QString &)));
-    connect(mActionBar, SIGNAL(newFolderToCreate()), this, SLOT(createNewFolder()));
-    connect(mActionBar, SIGNAL(deleteElements(const UBFeaturesMimeData *)), this, SLOT(deleteElements(const UBFeaturesMimeData *)));
     connect(mActionBar, SIGNAL(deleteSelectedElements()), this, SLOT(deleteSelectedElements()));
-    connect(mActionBar, SIGNAL(addToFavorite(const UBFeaturesMimeData *)), this, SLOT(addToFavorite(const UBFeaturesMimeData *)));
-    connect(mActionBar, SIGNAL(removeFromFavorite(const UBFeaturesMimeData *)), this, SLOT(removeFromFavorite(const UBFeaturesMimeData *)));
-    connect(mActionBar, SIGNAL(addElementsToFavorite() ), this, SLOT ( addElementsToFavorite()) );
-    connect(mActionBar, SIGNAL(removeElementsFromFavorite()), this, SLOT (removeElementsFromFavorite()));
+    connect(mActionBar, SIGNAL(newFolderToCreate()), this, SLOT(createNewFolder()));
+    connect(centralWidget->listView(), SIGNAL(clicked(QModelIndex)),
+            this, SLOT(currentSelected(QModelIndex)));
+    connect(centralWidget->listView()->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection))
+            , this, SLOT(processViewSelectionChanged(QItemSelection,QItemSelection)));
+    connect(this, SIGNAL(sendFileNameList(QStringList)),
+            centralWidget, SIGNAL(sendFileNameList(QStringList)));
+    connect(mActionBar, SIGNAL(searchElement(const QString &)),
+            this, SLOT( searchStarted(const QString &)));
+    connect(mActionBar, SIGNAL(deleteElements(const UBFeaturesMimeData *)),
+            this, SLOT(deleteElements(const UBFeaturesMimeData *)));
+    connect(mActionBar, SIGNAL(addToFavorite(const UBFeaturesMimeData *)),
+            this, SLOT(addToFavorite(const UBFeaturesMimeData *)));
+    connect(mActionBar, SIGNAL(removeFromFavorite(const UBFeaturesMimeData *)),
+            this, SLOT(removeFromFavorite(const UBFeaturesMimeData *)));
+    connect(mActionBar, SIGNAL(addElementsToFavorite() ),
+            this, SLOT ( addElementsToFavorite()) );
+    connect(mActionBar, SIGNAL(removeElementsFromFavorite()),
+            this, SLOT (removeElementsFromFavorite()));
 
     connect(mActionBar, SIGNAL(rescanModel()), this, SLOT(rescanModel()));
-    connect(pathListView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(currentSelected(const QModelIndex &)));
-    connect(UBApplication::boardController, SIGNAL(displayMetadata(QMap<QString,QString>)), this, SLOT(onDisplayMetadata( QMap<QString,QString>)));
-    connect(UBDownloadManager::downloadManager(), SIGNAL( addDownloadedFileToLibrary( bool, QUrl, QString, QByteArray, QString))
-             , this, SLOT(onAddDownloadedFileToLibrary(bool, QUrl, QString,QByteArray, QString)));
     connect(centralWidget, SIGNAL(lockMainWidget(bool)), this, SLOT(lockIt(bool)));
-    connect(centralWidget, SIGNAL(createNewFolderSignal(QString)), controller, SLOT(addNewFolder(QString)));
     connect(controller, SIGNAL(scanStarted()), centralWidget, SLOT(scanStarted()));
     connect(controller, SIGNAL(scanFinished()), centralWidget, SLOT(scanFinished()));
     connect(controller, SIGNAL(scanStarted()), mActionBar, SLOT(lockIt()));
     connect(controller, SIGNAL(scanFinished()), mActionBar, SLOT(unlockIt()));
-    connect(controller, SIGNAL(maxFilesCountEvaluated(int)), centralWidget, SIGNAL(maxFilesCountEvaluated(int)));
-    connect(controller, SIGNAL(featureAddedFromThread()), centralWidget, SIGNAL(increaseStatusBarValue()));
-    connect(controller, SIGNAL(scanCategory(QString)), centralWidget, SIGNAL(scanCategory(QString)));
-    connect(controller, SIGNAL(scanPath(QString)), centralWidget, SIGNAL(scanPath(QString)));
+    connect(pathListView, SIGNAL(clicked(const QModelIndex &)),
+            this, SLOT(currentSelected(const QModelIndex &)));
+    connect(UBApplication::boardController, SIGNAL(displayMetadata(QMap<QString,QString>)),
+            this, SLOT(onDisplayMetadata( QMap<QString,QString>)));
+    connect(UBDownloadManager::downloadManager(), SIGNAL( addDownloadedFileToLibrary( bool, QUrl, QString, QByteArray, QString))
+             , this, SLOT(onAddDownloadedFileToLibrary(bool, QUrl, QString,QByteArray, QString)));
+    connect(centralWidget, SIGNAL(createNewFolderSignal(QString)),
+            controller, SLOT(addNewFolder(QString)));
+    connect(controller, SIGNAL(maxFilesCountEvaluated(int)), centralWidget,
+            SIGNAL(maxFilesCountEvaluated(int)));
+    connect(controller, SIGNAL(featureAddedFromThread()), centralWidget,
+            SIGNAL(increaseStatusBarValue()));
+    connect(controller, SIGNAL(scanCategory(QString)),
+            centralWidget, SIGNAL(scanCategory(QString)));
+    connect(controller, SIGNAL(scanPath(QString)),
+            centralWidget, SIGNAL(scanPath(QString)));
 }
 
 UBFeaturesWidget::~UBFeaturesWidget()
@@ -607,9 +599,7 @@ void UBFeaturesListView::onLongPressEvent()
 
     contextMenuTrash.show();
 }
-//issue 1474 - NNE - 20131118 : END
 
-//issue 1474 - NNE - 20131119
 void UBFeaturesListView::emitRestoreFeature()
 {
     QModelIndexList selectedModel = this->selectionModel()->selectedIndexes();
@@ -621,9 +611,7 @@ void UBFeaturesListView::emitRestoreFeature()
 
     emit restoreFeature(selectedFeatures);
 }
-//issue 1474 - NNE - 20131119 : END
 
-//issue 1474 - NNE - 20131121 : END
 void UBFeaturesListView::hideContextMenu()
 {
     this->contextMenuTrash.hide();
@@ -1287,7 +1275,6 @@ void UBFeatureProperties::onAddToLib()
     }
 }
 
-// Issue 1684 - CFA - 20131120
 void UBFeatureProperties::setAsBackgroundPressed()
 {
     mSetAsBackgroundButtonPressedTime = QTime::currentTime();
@@ -1346,7 +1333,6 @@ void UBFeatureProperties::onSetAsBackground()
     featuresWidget->getFeaturesController()->addItemAsBackground( *mpElement, false );
 }
 
-// Issue 1684 - CFA - 20131120
 void UBFeatureProperties::onSetAsDefaultBackground()
 {
     QWidget *w = parentWidget()->parentWidget()->parentWidget();
@@ -1679,7 +1665,6 @@ int UBFeaturesModel::rowCount(const QModelIndex &parent) const
         return featuresList->size();
 }
 
-//issue 1474 - NNE - 20131121
 void UBFeaturesModel::rename(UBFeature &feature, const QString newName) const
 {
     QString path = feature.getFullPath().toLocalFile();

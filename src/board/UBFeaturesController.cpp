@@ -1,25 +1,3 @@
-/*
- * Copyright (C) 2010-2013 Groupement d'Intérêt Public pour l'Education Numérique en Afrique (GIP ENA)
- *
- * This file is part of Open-Sankoré.
- *
- * Open-Sankoré is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License,
- * with a specific linking exception for the OpenSSL project's
- * "OpenSSL" library (or with modified versions of it that use the
- * same license as the "OpenSSL" library).
- *
- * Open-Sankoré is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Open-Sankoré.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-
 #include <limits>
 #include <QGraphicsItem>
 #include <QPointF>
@@ -374,7 +352,6 @@ bool UBFeature::inTrash() const
     return getFullPath().toLocalFile().startsWith(QUrl::fromLocalFile(UBSettings::userTrashDirPath()).toLocalFile() );
 }
 
-//issue 1474 - NNE - 20131121
 void UBFeature::setName(const QString &newName)
 {
     QString name = newName;
@@ -392,7 +369,7 @@ void UBFeature::setName(const QString &newName)
     QString newUrl = fullPath.mid(0, slashPos+1) + name;
     this->mPath = QUrl(newUrl);
 }
-//issue 1474 - NNE - 20131121 : END
+
 
 UBFeaturesController::UBFeaturesController(QWidget *pParentWidget) :
     QObject(pParentWidget)
@@ -434,7 +411,6 @@ UBFeaturesController::UBFeaturesController(QWidget *pParentWidget) :
 
     QTimer::singleShot(0, this, SLOT(scanFS()));
 
-    //issue 1474 - NNE - 201310
     mTrashRegistery.synchronizeWith(UBSettings::userTrashDirPath());
 }
 
@@ -683,7 +659,7 @@ void UBFeaturesController::loadHardcodedItemsToModel()
     featuresList->clear();
     featuresList->append(rootData.categoryFeature());
 
-    *featuresList << audiosData.categoryFeature().markedWithSortKey("01")
+    *featuresList   << audiosData.categoryFeature().markedWithSortKey("01")
                     << moviesData.categoryFeature().markedWithSortKey("02")
                     << picturesData.categoryFeature().markedWithSortKey("03")
                     << flashData.categoryFeature().markedWithSortKey("04")
@@ -700,9 +676,11 @@ void UBFeaturesController::loadHardcodedItemsToModel()
 
     QList <UBToolsManager::UBToolDescriptor> tools = UBToolsManager::manager()->allTools();
 
-    foreach (UBToolsManager::UBToolDescriptor tool, tools) {
+    foreach (UBToolsManager::UBToolDescriptor tool, tools)
+    {
         featuresList->append(UBFeature(appData.categoryFeature().getFullVirtualPath() + "/" + tool.label, tool.icon.toImage(), tool.label, QUrl(tool.id), FEATURE_INTERNAL, UBFeature::NO_P));
-        if (favoriteSet->find(QUrl(tool.id)) != favoriteSet->end()) {
+        if (favoriteSet->find(QUrl(tool.id)) != favoriteSet->end())
+        {
             featuresList->append(UBFeature(favoriteData.categoryFeature().getFullVirtualPath() + "/" + tool.label, tool.icon.toImage(), tool.label, QUrl(tool.id), FEATURE_INTERNAL, UBFeature::NO_P));
         }
     }
@@ -1141,7 +1119,6 @@ void UBFeaturesController::addNewFolder(QString name)
     featuresProxyModel->invalidate();
 }
 
-//issue 1474 - NNE - 20131121
 void UBFeaturesController::addNewFolder(QString name, const UBFeature from)
 {
     UBFeature currentElement = this->currentElement;
@@ -1150,7 +1127,6 @@ void UBFeaturesController::addNewFolder(QString name, const UBFeature from)
     this->addNewFolder(name);
     this->currentElement = currentElement;
 }
-//issue 1474 - NNE - 20131121 : END
 
 void UBFeaturesController::addItemToPage(const UBFeature &item)
 {
@@ -1178,7 +1154,6 @@ void UBFeaturesController::addItemAsBackground(UBFeature &item, bool isFromPalet
     UBApplication::boardController->persistCurrentScene();
 }
 
-// Issue 1684 - CFA - 20131120
 const UBFeatureBackgroundDisposition& UBFeature::backgroundDisposition() const
 {
     return mDisposition;
@@ -1257,7 +1232,7 @@ void UBFeaturesController::addItemAsDefaultBackground(UBFeature &item, bool isFr
     QApplication::restoreOverrideCursor();
 }
 
-//isue 1474 - NNE - 20131210
+
 QString UBFeaturesController::getTranslationNameForCategoryData(const QString& name) const
 {
     CategoryData category;
@@ -1291,7 +1266,6 @@ QString UBFeaturesController::getTranslationNameForCategoryData(const QString& n
     QString s = category.categoryFeature().getDisplayName();
     return s;
 }
-//isue 1474 - NNE - 20131210 : END
 
 CategoryData UBFeaturesController::getDestinationCategoryForUrl( const QUrl &url )
 {
@@ -1721,7 +1695,6 @@ void UBFeaturesController::assignPathListView(UBFeaturesListView *pList)
     pList->setItemDelegate(pathItemDelegate);
 }
 
-//issue 1474 - NNE - 20131119
 void UBFeaturesController::restoreFeature(const QVector<UBFeature> features)
 {
     QString textHasBeenRestored = tr("has been restored to");
@@ -1799,9 +1772,7 @@ UBFeature UBFeaturesController::getFeatureByFullPath(const QString &path) const
 
     return UBFeature();
 }
-//issue 1474 - NNE - 20131119 : END
 
-//issue 1474 - NNE - 20131125
 bool UBFeaturesController::restoreFolderFeature(UBFeature &feature, RegisteryEntry entry)
 {
     bool hasBeenRestored = true;
@@ -1894,25 +1865,19 @@ bool UBFeaturesController::restoreFileFeature(UBFeature& feature, RegisteryEntry
 
     return hasBeenRestored;
 }
-//issue 1474 - NNE - 20131125 : END
 
-//issue 1474 - NNE - 20131120
 void UBFeaturesController::removeFromTrashRegistery(UBFeature feature)
 {
     mTrashRegistery.removeEnty(feature.getName());
     mTrashRegistery.saveToDisk();
 }
 
-//issue 1474 - NNE - 20131120 :END
 
-//issue 1474 - NNE - 20131213
 RegisteryEntry UBFeaturesController::getRegisteryEntry(const QString &name) const
 {
     return mTrashRegistery.getEntry(name);
 }
-//issue 1474 - NNE - 20131213 : END
 
-//issue 1699 - NNE - 20140224
 void UBFeaturesController::setRTEIsLoaded(bool isLoaded)
 {
     UBFeaturesController::mRTEIsLoaded = isLoaded;

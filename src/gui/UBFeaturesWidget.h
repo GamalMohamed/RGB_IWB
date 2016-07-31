@@ -100,7 +100,6 @@ public:
     void switchToRoot();
     void switchToBookmarks();
 
-    // Issue 1684 - CFA 20131120
     UBFeaturesCentralWidget* getCentralWidget() { return centralWidget; }
 
     static const int minThumbnailSize = 20;
