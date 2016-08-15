@@ -47,7 +47,7 @@ UBRubberBand::UBRubberBand(Shape s, QWidget * p)
     customStyle = NULL;
 
 #ifdef Q_WS_WIN
-    customStyle = new QWindowsXPStyle();
+    customStyle = new QWindowsStyle(); //COMMENTED!
 #elif defined(Q_WS_MAC)
     customStyle = new QMacStyle();
 #elif defined(Q_WS_X11)

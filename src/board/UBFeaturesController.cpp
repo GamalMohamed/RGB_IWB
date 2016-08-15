@@ -35,7 +35,7 @@ void UBFeaturesComputingThread::scanFS(const QUrl & currentPath
                                        , UBFeature::Permissions pPermissions
                                        , const QList<CategoryData> &extData)
 {
-    Q_ASSERT(QFileInfo(currentPath.toLocalFile()).exists());
+    //Q_ASSERT(QFileInfo(currentPath.toLocalFile()).exists()); //COMMENTED!
 
     QFileInfoList fileInfoList = UBFileSystemUtils::allElementsInDirectory(currentPath.toLocalFile());
 

@@ -155,7 +155,10 @@ void UBNetworkAccessManager::proxyAuthenticationRequired(const QNetworkProxy &pr
 void UBNetworkAccessManager::sslErrors(QNetworkReply *reply, const QList<QSslError> &error)
 {
     // check if SSL certificate has been trusted already
-    QString replyHost = reply->url().host() + ":" + reply->url().port();
+    
+	//COMMENTED!
+	/*
+	QString replyHost = reply->url().host() + ":" + reply->url().port();
     if(!sslTrustedHostList.contains(replyHost))
     {
         QWidget *mainWindow = QApplication::activeWindow();
@@ -181,5 +184,5 @@ void UBNetworkAccessManager::sslErrors(QNetworkReply *reply, const QList<QSslErr
             reply->ignoreSslErrors();
             sslTrustedHostList.append(replyHost);
         }
-    }
+    }*/
 }

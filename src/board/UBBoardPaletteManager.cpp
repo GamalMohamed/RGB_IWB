@@ -176,6 +176,8 @@ void UBBoardPaletteManager::setupDockPaletteWidgets()
     mRightPalette->removeTab(mpDownloadWidget);
     mRightPalette->removeTab(mpCachePropWidget);
     mRightPalette->Hide();
+	mLeftPalette->Hide();
+
 
 }
 
