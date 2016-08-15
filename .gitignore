@@ -10,6 +10,14 @@
 *.dll
 *.dylib
 
+# Visual Studio fies
+*.ncb
+*.sln
+*.vcproj
+*.user
+*.idb
+*.pdb
+
 # Qt-es
 
 /.qmake.cache
