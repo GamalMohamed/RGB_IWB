@@ -17,6 +17,7 @@
 *.user
 *.idb
 *.pdb
+*.suo
 
 # Qt-es
 
